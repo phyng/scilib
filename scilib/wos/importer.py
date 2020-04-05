@@ -80,6 +80,10 @@ def read_text_format_dir_as_pd(abs_path, globs=None):
 
 
 async def read_text_format_dir_parallel(abs_path, callback, *args, globs=None):
+    """ parallel read
+
+    benchmark: read 9232360 item in 1m26s
+    """
     loop = asyncio.get_running_loop()
     futures = []
     with concurrent.futures.ProcessPoolExecutor() as pool:
@@ -87,3 +91,18 @@ async def read_text_format_dir_parallel(abs_path, callback, *args, globs=None):
             future = loop.run_in_executor(pool, callback, path, *args)
             futures.append(future)
     return await asyncio.gather(*futures)
+
+
+def _get_uts_parallel_worker(path):
+    items = read_text_format_path(path)
+    return [item['UT'] for item in items]
+
+
+async def get_uts_parallel(abs_path):
+    """ get all uts
+    """
+    results = await read_text_format_dir_parallel(abs_path, _get_uts_parallel_worker)
+    uts = set()
+    for result in results:
+        uts.update(result)
+    return uts

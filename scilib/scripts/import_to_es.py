@@ -7,20 +7,11 @@ from __future__ import unicode_literals, absolute_import, print_function, divisi
 
 import asyncio
 from optparse import OptionParser
-from wos.importer import read_text_format_dir_parallel, read_text_format_path
-
-
-def worker(path):
-    items = read_text_format_path(path)
-    return [item['UT'] for item in items]
+from wos.importer import get_uts_parallel
 
 
 async def count_uts(from_dir):
-    results = await read_text_format_dir_parallel(from_dir, worker)
-    uts = set()
-    for result in results:
-        uts.update(result)
-    print(len(uts))
+    print(len(await get_uts_parallel(from_dir)))
 
 
 if __name__ == '__main__':
