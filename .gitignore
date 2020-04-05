@@ -1,0 +1,46 @@
+# editor
+.vscode/
+
+# python
+__pycache__/
+*.py[cod]
+.mypy_cache/
+
+# build
+build/
+dist/
+eggs/
+.eggs/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# test
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# translations
+*.mo
+*.pot
+
+# jupyter notebook
+.ipynb_checkpoints
+
+# env
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
