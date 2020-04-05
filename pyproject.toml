@@ -19,6 +19,8 @@ numpy = "^1.18.2"
 xlrd = "^1.2.0"
 matplotlib = "^3.2.1"
 scipy = "^1.4.1"
+requests = "^2.23.0"
+orjson = "^2.6.3"
 
 [tool.poetry.dev-dependencies]
 sphinx = "^2.4.4"

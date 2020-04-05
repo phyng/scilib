@@ -28,7 +28,7 @@ def _get_wc_ecoom_map_lower():
 
 def parse_ecoom_categorys(row, field='WC'):
     wc_ecoom_map_lower = _get_wc_ecoom_map_lower()
-    wcs = str(row[field]).split(';')
+    wcs = str(row.get(field, '')).split(';')
     ecooms = []
     for wc in wcs:
         wc = wc.strip().lower()

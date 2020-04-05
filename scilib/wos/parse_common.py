@@ -10,7 +10,7 @@ def parse_is_article(row):
 
 
 def parse_is_oa(row):
-    oa = str(row['OA']).lower()
+    oa = str(row.get('OA', '')).lower()
     if oa and oa != 'nan':
         return True
     return False

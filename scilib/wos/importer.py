@@ -90,7 +90,7 @@ async def read_text_format_dir_parallel(abs_path, callback, *args, globs=None):
         for path in scan_text_format_dir(abs_path, globs=globs):
             future = loop.run_in_executor(pool, callback, path, *args)
             futures.append(future)
-    return await asyncio.gather(*futures)
+    return await asyncio.gather(*futures, return_exceptions=False)
 
 
 def _get_uts_parallel_worker(path):
