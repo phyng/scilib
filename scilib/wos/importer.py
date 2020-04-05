@@ -6,7 +6,7 @@ import pandas as pd
 from pathlib import Path
 
 
-def read_text_format_lines(lines):
+def _read_text_format_lines(lines):
     items = []
     current_item = None
     current_item_key = None
@@ -30,7 +30,7 @@ def read_text_format_lines(lines):
             current_item_key = None
         elif len(start) == 2:
             if current_item is None:
-                print('[WARN] read_text_format_lines', index, line)
+                print('[WARN] _read_text_format_lines', index, line)
             current_item[start] = [end]
             current_item_key = start
         else:
@@ -45,7 +45,7 @@ def read_text_format_dir(abs_path, globs=None):
             with open(path, 'r', encoding='utf-8-sig') as f:
                 lines = f.read().split('\n')
             try:
-                items = read_text_format_lines(lines)
+                items = _read_text_format_lines(lines)
             except Exception:
                 print('[WARN] read_text_format_dir', path)
                 raise
