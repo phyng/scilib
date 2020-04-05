@@ -2,8 +2,10 @@
 
 from __future__ import unicode_literals, absolute_import, print_function, division
 
+import asyncio
 import pandas as pd
 from pathlib import Path
+import concurrent.futures
 
 
 def _read_text_format_lines(lines):
@@ -38,27 +40,50 @@ def _read_text_format_lines(lines):
     return items
 
 
-def read_text_format_dir(abs_path, globs=None):
+def read_text_format_path(path):
+    with open(path, 'r', encoding='utf-8-sig') as f:
+        lines = f.read().split('\n')
+    try:
+        items = _read_text_format_lines(lines)
+    except Exception:
+        print('[WARN] read_text_format_dir', path)
+        raise
+
+    data_list = []
+    for item in items:
+        data = {}
+        for k, v in item.items():
+            if k in ['WC', 'SC']:
+                data[k] = ' '.join(v)
+            else:
+                data[k] = '; '.join(v)
+        data_list.append(data)
+    return data_list
+
+
+def scan_text_format_dir(abs_path, *, globs=None):
     globs = globs or ['**/*.txt', '**/*.csv', '*.csv', '*.txt']
     for glob in globs:
         for path in Path(abs_path).glob(glob):
-            with open(path, 'r', encoding='utf-8-sig') as f:
-                lines = f.read().split('\n')
-            try:
-                items = _read_text_format_lines(lines)
-            except Exception:
-                print('[WARN] read_text_format_dir', path)
-                raise
-            for item in items:
-                data = {}
-                for k, v in item.items():
-                    if k in ['WC', 'SC']:
-                        data[k] = ' '.join(v)
-                    else:
-                        data[k] = '; '.join(v)
-                yield data
+            yield path
+
+
+def read_text_format_dir(abs_path, *, globs=None):
+    for path in scan_text_format_dir(abs_path, globs=globs):
+        for item in read_text_format_path(path):
+            yield item
 
 
 def read_text_format_dir_as_pd(abs_path, globs=None):
-    all_items = read_text_format_dir(abs_path, globs)
+    all_items = list(read_text_format_dir(abs_path, globs=globs))
     return pd.DataFrame.from_records(all_items).drop_duplicates('UT')
+
+
+async def read_text_format_dir_parallel(abs_path, callback, *args, globs=None):
+    loop = asyncio.get_running_loop()
+    futures = []
+    with concurrent.futures.ProcessPoolExecutor() as pool:
+        for path in scan_text_format_dir(abs_path, globs=globs):
+            future = loop.run_in_executor(pool, callback, path, *args)
+            futures.append(future)
+    return await asyncio.gather(*futures)

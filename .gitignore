@@ -1,5 +1,6 @@
 # editor
 .vscode/
+.DS_Store
 
 # python
 __pycache__/
