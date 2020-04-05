@@ -1,22 +1,20 @@
 
-# libs
+# scilib
 
-Some library to extend Python Standard Library
-
-[![Github](https://github.com/phyng/libs/workflows/test/badge.svg)](https://github.com/phyng/libs/actions) [![Pypi](https://img.shields.io/pypi/v/libs.svg?style=flat&label=PyPI)](https://pypi.org/project/libs/)
+[![Github](https://github.com/phyng/scilib/workflows/test/badge.svg)](https://github.com/phyng/scilib/actions) [![Pypi](https://img.shields.io/pypi/v/scilib.svg?style=flat&label=PyPI)](https://pypi.org/project/scilib/)
 
 ## documentation
 
-https://phyng.com/libs/
+https://phyng.com/scilib/
 
 ## install
 
 ```bash
 # use pip
-pip install libs
+pip install scilib
 
 # or use poetry
-poetry add libs
+poetry add scilib
 ```
 
 ## test

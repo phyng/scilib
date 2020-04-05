@@ -1,22 +1,22 @@
 {
-  "name": "libs",
+  "name": "scilib",
   "version": "0.0.9",
   "description": "Packages of tools",
   "main": "index.js",
   "scripts": {
-    "test": "python -m unittest discover -v -s libs/",
-    "test_coverage": "coverage run --rcfile=./tox.ini -m unittest discover -v -s libs/ && coverage combine && coverage html -i",
+    "test": "python -m unittest discover -v -s scilib/",
+    "test_coverage": "coverage run --rcfile=./tox.ini -m unittest discover -v -s scilib/ && coverage combine && coverage html -i",
     "upload": "rm dist/* && python3 setup.py sdist bdist_wheel && twine upload dist/*",
     "poetry_publish": "poetry build && poetry publish"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/phyng/libs.git"
+    "url": "git+https://github.com/phyng/scilib.git"
   },
   "author": "phyng",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/phyng/libs/issues"
+    "url": "https://github.com/phyng/scilib/issues"
   },
-  "homepage": "https://github.com/phyng/libs#readme"
+  "homepage": "https://github.com/phyng/scilib#readme"
 }

@@ -4,14 +4,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="libs",
+    name="scilib",
     version="0.0.9",
     author="phyng",
     author_email="phyngk@gmail.com",
-    description="Packages of tools",
+    description="scilib",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/phyng/libs",
+    url="https://github.com/phyng/scilib",
     packages=setuptools.find_packages(),
     classifiers=(
         "Operating System :: OS Independent",
