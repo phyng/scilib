@@ -1,9 +1,9 @@
-.. libs documentation master file, created by
+.. scilib documentation master file, created by
    sphinx-quickstart on Sat Apr  4 22:32:56 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to libs's documentation!
+Welcome to scilib's documentation!
 ================================
 
 .. toctree::
@@ -11,17 +11,17 @@ Welcome to libs's documentation!
    :caption: Contents:
 
 
-libs
+scilib
 ========
 
-.. automodule:: libs.iterlib
+.. automodule:: scilib.iterlib
    :members:
 
 
 iolib
 ===========
 
-.. automodule:: libs.iolib.file
+.. automodule:: scilib.iolib.file
    :members:
 
 

@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "libs"
+name = "scilib"
 version = "0.0.9"
-description = "Packages of tools"
+description = "scilib"
 license = "MIT"
 readme = "README.md"
 authors = ["phyng <phyngk@gmail.com>"]
-homepage = "https://github.com/phyng/libs"
-repository = "https://github.com/phyng/libs"
+homepage = "https://github.com/phyng/scilib"
+repository = "https://github.com/phyng/scilib"
 classifiers = [
     "Operating System :: OS Independent",
 ]
