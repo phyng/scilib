@@ -42,7 +42,7 @@ def parse_rid(text):
     return results
 
 
-def parse_rid_info(text, *, hmt=True):
+def parse_rid_info(text):
     results = parse_rid(text)
     infos = []
     for name, rid in results:
