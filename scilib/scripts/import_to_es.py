@@ -13,18 +13,19 @@ from wos.parser import parse_version1
 from db.es import index_or_update_rows
 
 
-def callback(path):
+def callback(path, index):
     items = read_text_format_path(path)
     parse_version1(items)
-    index_or_update_rows(items, index='wos2', action='index')
+    index_or_update_rows(items, index=index, action='index')
 
 
-async def main(from_dir):
-    await read_text_format_dir_parallel(from_dir, callback)
+async def main(from_dir, index):
+    await read_text_format_dir_parallel(from_dir, callback, index)
 
 
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("--from", action="store", type="str", dest="from_dir", default=".")
+    parser.add_option("--index", action="store", type="str", dest="index", default="wos")
     options, args = parser.parse_args()
-    asyncio.run(main(options.from_dir))
+    asyncio.run(main(options.from_dir, options.index))

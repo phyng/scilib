@@ -1,6 +1,6 @@
 {
   "name": "scilib",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "description": "Packages of tools",
   "main": "index.js",
   "scripts": {

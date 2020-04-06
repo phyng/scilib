@@ -14,3 +14,9 @@ def parse_is_oa(row):
     if oa and oa != 'nan':
         return True
     return False
+
+
+def parse_py_datetime(row):
+    if row.get('PY', '') and str(row['PY']) != 'nan':
+        return f'{row["PY"]}-01-01'
+    return None
