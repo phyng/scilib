@@ -5,12 +5,12 @@ from __future__ import unicode_literals, absolute_import, print_function, divisi
 import os
 from unittest import TestCase
 
-from wos.importer import read_text_format_dir_as_pd
-from wos.parse_country import add_countrys_to_df
-from wos.parse_categorys import SSH_CATEGORYS_SET, parse_ecoom_categorys
-from wos.parse_doi import parse_cr_dois
-from wos.parse_address import parse_address
-from wos.parser import parse_version1
+from scilib.wos.importer import read_text_format_dir_as_pd
+from scilib.wos.parse_country import add_countrys_to_df
+from scilib.wos.parse_categorys import SSH_CATEGORYS_SET, parse_ecoom_categorys
+from scilib.wos.parse_doi import parse_cr_dois
+from scilib.wos.parse_address import parse_address
+from scilib.wos.parser import parse_version1
 
 TEST_PATH = os.path.dirname(__file__)
 

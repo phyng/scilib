@@ -6,7 +6,7 @@ import os
 import asyncio
 from unittest import TestCase
 
-from wos.importer import read_text_format_dir, read_text_format_dir_as_pd, get_uts_parallel
+from scilib.wos.importer import read_text_format_dir, read_text_format_dir_as_pd, get_uts_parallel
 
 TEST_PATH = os.path.dirname(__file__)
 

@@ -29,5 +29,5 @@ npm test_coverage
 ### import wos data to ElasticSearch
 
 ```bash
-env ES_API=http://localhost:9205 python -m scripts.import_to_es --from /path/to/wos_data/ --index wos
+env ES_API=http://localhost:9205 scilib-wos-import --from /path/to/wos_data/ --to es --index wos
 ```

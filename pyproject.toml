@@ -12,6 +12,9 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 
+[tool.poetry.scripts]
+scilib-wos-import = "scilib.scripts.wos_import:run"
+
 [tool.poetry.dependencies]
 python = "^3.7"
 pandas = "^1.0.3"
