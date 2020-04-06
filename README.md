@@ -17,17 +17,17 @@ pip install scilib
 poetry add scilib
 ```
 
-## test
-
-```bash
-npm test
-npm test_coverage
-```
-
 ## usage
 
 ### import wos data to ElasticSearch
 
 ```bash
 env ES_API=http://localhost:9205 scilib-wos-import --from /path/to/wos_data/ --to es --index wos
+```
+
+## test
+
+```bash
+npm test
+npm test_coverage
 ```

@@ -8,6 +8,10 @@ from .parse_country import parse_country
 from .parse_doi import parse_cr_dois
 from .parse_tags import parse_tags
 
+from .parse_orcid import parse_orcid_info
+from .parse_address import parse_address_info
+from .parse_rid import parse_rid_info
+
 
 def convert_field_type(item):
     array_keys = [
@@ -52,5 +56,9 @@ def parse_version1(items):
         row['countrys_c1_rp'] = parse_country(row, field='C1', extra_field='RP', hmt=True)
         row['cr_dois'] = parse_cr_dois(row)
         row['tags'] = parse_tags(row)
+
+        row['c1_address_info'] = parse_address_info(row.get('C1', ''))
+        row['orcid_info'] = parse_orcid_info(row.get('OI', ''))
+        row['rid_info'] = parse_rid_info(row.get('RI', ''))
 
         convert_field_type(row)
