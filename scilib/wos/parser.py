@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals, absolute_import, print_function, division
 
-from .parse_common import parse_is_article, parse_is_oa
+from .parse_common import parse_is_article, parse_is_oa, parse_py_datetime
 from .parse_categorys import parse_ecoom_categorys
 from .parse_country import parse_country
 from .parse_doi import parse_cr_dois
@@ -18,6 +18,7 @@ def parse_version1(items):
 
         row['is_article'] = parse_is_article(row)
         row['is_oa'] = parse_is_oa(row)
+        row['py_datetime'] = parse_py_datetime(row)
         row['ecoom_categorys'] = parse_ecoom_categorys(row)
 
         row['countrys_c1'] = parse_country(row, field='C1', hmt=True)
