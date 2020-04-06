@@ -8,9 +8,9 @@ from __future__ import unicode_literals, absolute_import, print_function, divisi
 import asyncio
 from optparse import OptionParser
 
-from wos.importer import read_text_format_dir_parallel, read_text_format_path
-from wos.parser import parse_version1
-from db.es import index_or_update_rows
+from scilib.wos.importer import read_text_format_dir_parallel, read_text_format_path
+from scilib.wos.parser import parse_version1
+from scilib.db.es import index_or_update_rows
 
 
 def callback(path, index):
@@ -23,9 +23,14 @@ async def main(from_dir, index):
     await read_text_format_dir_parallel(from_dir, callback, index)
 
 
-if __name__ == '__main__':
+def run():
     parser = OptionParser()
     parser.add_option("--from", action="store", type="str", dest="from_dir", default=".")
+    parser.add_option("--to", action="store", type="str", dest="to", default="es")
     parser.add_option("--index", action="store", type="str", dest="index", default="wos")
     options, args = parser.parse_args()
     asyncio.run(main(options.from_dir, options.index))
+
+
+if __name__ == '__main__':
+    run()

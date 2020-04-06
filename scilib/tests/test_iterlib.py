@@ -3,7 +3,7 @@
 from __future__ import unicode_literals, absolute_import, print_function, division
 
 from unittest import TestCase
-from iterlib import uniqify, chunks, isplit
+from scilib.iterlib import uniqify, chunks, isplit
 
 
 class IterlibTest(TestCase):
