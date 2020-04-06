@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scilib"
-version = "0.0.9"
+version = "0.0.11"
 description = "scilib"
 license = "MIT"
 readme = "README.md"
@@ -9,6 +9,7 @@ homepage = "https://github.com/phyng/scilib"
 repository = "https://github.com/phyng/scilib"
 classifiers = [
     "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
 ]
 
 [tool.poetry.dependencies]

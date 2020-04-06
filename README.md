@@ -23,3 +23,11 @@ poetry add scilib
 npm test
 npm test_coverage
 ```
+
+## usage
+
+### import wos data to ElasticSearch
+
+```bash
+env ES_API=http://localhost:9205 python -m scripts.import_to_es --from /path/to/wos_data/ --index wos
+```
