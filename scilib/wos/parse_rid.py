@@ -2,53 +2,52 @@
 
 from __future__ import unicode_literals, absolute_import, print_function, division
 
+import re
 
-def parse_orcid(text):
-    """ parse OI field
+
+def parse_rid(text):
+    """ parse RI field
     """
     if not text or str(text) == 'nan':
         return []
-    state = 'NAME'  # NAME | ORCID
+    state = 'NAME'  # NAME | RID
     name = ''
-    orcid = ''
+    rid = ''
 
     results = []
     for c in text:
         if state == 'NAME':
             if c == '/':
-                state = 'ORCID'
+                state = 'RID'
                 continue
             elif name == '' and c in [' ', ';']:
                 continue
             else:
                 name += c
-        elif state == 'ORCID':
-            if len(orcid) == 19:
-                results.append((name, orcid))
+        elif state == 'RID':
+            if rid.count('-') == 2 and re.search(r'-\d{4}$', rid):
+                results.append((name, rid))
                 state = 'NAME'
                 name = ''
-                orcid = ''
+                rid = ''
                 continue
-            elif c in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', 'X']:
-                orcid += c
             else:
-                state = 'NAME'
-                name += c
+                rid += c
                 continue
         else:
             raise ValueError(state)
 
-    if name and orcid:
-        results.append((name, orcid))
+    if name and rid:
+        results.append((name, rid))
     return results
 
 
-def parse_orcid_info(text, *, hmt=True):
-    results = parse_orcid(text)
+def parse_rid_info(text, *, hmt=True):
+    results = parse_rid(text)
     infos = []
-    for name, orcid in results:
+    for name, rid in results:
         infos.append(dict(
             name=name,
-            orcid=orcid,
+            rid=rid,
         ))
     return infos
