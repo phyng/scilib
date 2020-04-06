@@ -51,8 +51,8 @@ class WOSParserTest(TestCase):
         parse_version1(items)
         for item in items:
             self.assertEqual(item['is_article'], 'article' in str(item['DT']).lower())
-            self.assertEqual('10.' in item['cr_dois'], '10.' in str(item['CR']))
-            self.assertEqual('hong kong' in item['countrys_c1'], 'hong kong' in str(item['C1']).lower())
+            self.assertEqual('10.' in ';'.join(item['cr_dois']), '10.' in str(item['CR']))
+            self.assertEqual('hong kong' in ';'.join(item['countrys_c1']), 'hong kong' in str(item['C1']).lower())
 
     def test_parse_address(self):
         df = read_text_format_dir_as_pd(TEST_PATH)

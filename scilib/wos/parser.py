@@ -9,20 +9,48 @@ from .parse_doi import parse_cr_dois
 from .parse_tags import parse_tags
 
 
+def convert_field_type(item):
+    array_keys = [
+        'ecoom_categorys',
+        'countrys_c1',
+        'countrys_rp',
+        'countrys_c1_rp',
+        'cr_dois',
+        'tags',
+    ]
+    for key in array_keys:
+        item[key] = item[key].split(';') if item[key] else []
+    for key in item.keys():
+        if str(item[key]) == 'nan':
+            item[key] = None
+
+
 def parse_version1(items):
     """ version1
+
+    - parser_version
+    - is_article
+    - is_oa
+    - py_datetime
+    - ecoom_categorys
+    - countrys_c1
+    - countrys_rp
+    - countrys_c1_rp
+    - cr_dois
+    - tags
     """
 
     for row in items:
-        row['parse_version'] = 1
-
+        row['parser_version'] = 1
         row['is_article'] = parse_is_article(row)
         row['is_oa'] = parse_is_oa(row)
         row['py_datetime'] = parse_py_datetime(row)
-        row['ecoom_categorys'] = parse_ecoom_categorys(row)
 
+        row['ecoom_categorys'] = parse_ecoom_categorys(row)
         row['countrys_c1'] = parse_country(row, field='C1', hmt=True)
         row['countrys_rp'] = parse_country(row, field='RP', hmt=True)
         row['countrys_c1_rp'] = parse_country(row, field='C1', extra_field='RP', hmt=True)
         row['cr_dois'] = parse_cr_dois(row)
         row['tags'] = parse_tags(row)
+
+        convert_field_type(row)
