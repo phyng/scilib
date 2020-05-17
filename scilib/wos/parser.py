@@ -4,7 +4,8 @@ from __future__ import unicode_literals, absolute_import, print_function, divisi
 
 from .parse_common import parse_is_article, parse_is_oa, parse_py_datetime
 from .parse_categorys import parse_ecoom_categorys
-from .parse_country import parse_country
+from .parse_country import parse_country, parse_collaboration_type_china, parse_lead_type_china
+from .parse_country import parse_collaboration_type, parse_first_country
 from .parse_doi import parse_cr_dois
 from .parse_tags import parse_tags
 
@@ -50,12 +51,17 @@ def parse_version1(items):
         row['is_oa'] = parse_is_oa(row)
         row['py_datetime'] = parse_py_datetime(row)
 
-        row['ecoom_categorys'] = parse_ecoom_categorys(row)
         row['countrys_c1'] = parse_country(row, field='C1', hmt=True)
         row['countrys_rp'] = parse_country(row, field='RP', hmt=True)
         row['countrys_c1_rp'] = parse_country(row, field='C1', extra_field='RP', hmt=True)
-        row['cr_dois'] = parse_cr_dois(row)
+        row['collaboration_type_china'] = parse_collaboration_type_china(row['countrys_c1_rp'])
+        row['lead_type_china'] = parse_lead_type_china(row['countrys_c1_rp'])
+        row['collaboration_type'] = parse_collaboration_type(row['countrys_c1_rp'])
+        row['first_country'] = parse_first_country(row['countrys_c1_rp'])
+
+        row['ecoom_categorys'] = parse_ecoom_categorys(row)
         row['tags'] = parse_tags(row)
+        row['cr_dois'] = parse_cr_dois(row)
 
         row['c1_address_info'] = parse_address_info(row.get('C1', ''))
         row['orcid_info'] = parse_orcid_info(row.get('OI', ''))

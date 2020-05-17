@@ -8,6 +8,7 @@ from functools import lru_cache, partial
 import pandas as pd
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CHMT = set(['hong kong', 'macao', 'taiwan', 'china'])
 COUNTRY_MAP = {
     "England": "UK",
     "Scotland": "UK",
@@ -92,3 +93,41 @@ def add_countrys_to_df(
 ):
     _apply_col = partial(parse_country, field=field, extra_field=extra_field, hmt=hmt)
     return df_temp.apply(_apply_col, axis=1)
+
+
+def parse_collaboration_type_china(countrys):
+    countrys = set(countrys.split(';'))
+    if len(countrys) == 1:
+        return 'N-ICP'
+    elif countrys.issubset(CHMT):
+        return 'chmt'
+    elif countrys:
+        return 'ICP'
+    else:
+        return 'NODATA'
+
+
+def parse_lead_type_china(countrys):
+    countrys_list = countrys.split(';')
+    if countrys_list:
+        if countrys_list[0] in CHMT:
+            return countrys_list[0]
+        return 'other'
+    return 'NODATA'
+
+
+def parse_collaboration_type(countrys):
+    countrys = set(countrys.split(';'))
+    if len(countrys) == 1:
+        return 'N-ICP'
+    elif countrys:
+        return 'ICP'
+    else:
+        return 'NODATA'
+
+
+def parse_first_country(countrys):
+    countrys_list = countrys.split(';')
+    if countrys_list:
+        return countrys_list[0]
+    return 'NODATA'
