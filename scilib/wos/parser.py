@@ -13,21 +13,28 @@ from .parse_orcid import parse_orcid_info
 from .parse_address import parse_address_info
 from .parse_rid import parse_rid_info
 
+ARRAY_KEYS = [
+    'ecoom_categorys',
+    'countrys_c1',
+    'countrys_rp',
+    'countrys_c1_rp',
+    'cr_dois',
+    'tags',
+]
 
-def convert_field_type(item):
-    array_keys = [
-        'ecoom_categorys',
-        'countrys_c1',
-        'countrys_rp',
-        'countrys_c1_rp',
-        'cr_dois',
-        'tags',
-    ]
-    for key in array_keys:
+
+def add_row_type(item):
+    for key in ARRAY_KEYS:
         item[key] = item[key].split(';') if item[key] else []
     for key in item.keys():
         if str(item[key]) == 'nan':
             item[key] = None
+
+
+def remove_row_type(item):
+    for key in ARRAY_KEYS:
+        if type(item[key]) is list:
+            item[key] = ';'.join([str(i) for i in item[key]])
 
 
 def parse_version1(items):
@@ -67,4 +74,4 @@ def parse_version1(items):
         row['orcid_info'] = parse_orcid_info(row.get('OI', ''))
         row['rid_info'] = parse_rid_info(row.get('RI', ''))
 
-        convert_field_type(row)
+        add_row_type(row)
