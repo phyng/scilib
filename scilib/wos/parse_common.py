@@ -9,6 +9,11 @@ def parse_is_article(row):
     return False
 
 
+def parse_document_types(row):
+    dt = str(row.get('DT', ''))
+    return ';'.join([i.strip() for i in dt.split(';')])
+
+
 def parse_is_oa(row):
     oa = str(row.get('OA', '')).lower()
     if oa and oa != 'nan':

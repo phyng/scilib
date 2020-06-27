@@ -10,7 +10,7 @@ import pandas as pd
 from optparse import OptionParser
 
 from scilib.wos.importer import read_text_format_dir_parallel, read_text_format_path
-from scilib.wos.parser import parse_version1
+from scilib.wos.parser import parse_version1, remove_row_type
 from scilib.db.es import index_or_update_rows
 
 
@@ -32,6 +32,8 @@ def csv_callback(path, fields, tag, py_from, py_to):
         pys = [str(i) for i in range(int(py_from), int(py_to) + 1)]
         items = [item for item in items if item.get('PY', '') in pys]
 
+    for item in items:
+        remove_row_type(item)
     return [{k: v for k, v in item.items() if k in fields} for item in items]
 
 
@@ -67,12 +69,12 @@ async def main(from_dir, to_type, index, fields, tag, py_from, py_to):
         print(f'download_dois={len(download_dois)} cr_dois={len(cr_dois)} new_dois={len(new_dois)}')
     elif to_type.endswith('.csv'):
         results = await read_text_format_dir_parallel(from_dir, csv_callback, fields, tag, py_from, py_to)
-        df = pd.DataFrame.from_records((i for li in results for i in li))
+        df = pd.DataFrame.from_records((i for li in results for i in li)).drop_duplicates('UT')
         print(df.shape)
         df.to_csv(to_type)
     elif to_type.endswith('.xlsx'):
         results = await read_text_format_dir_parallel(from_dir, csv_callback, fields, tag, py_from, py_to)
-        df = pd.DataFrame.from_records((i for li in results for i in li))
+        df = pd.DataFrame.from_records((i for li in results for i in li)).drop_duplicates('UT')
         print(df.shape)
         df.to_excel(to_type)
     else:

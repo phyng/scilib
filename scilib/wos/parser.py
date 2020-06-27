@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals, absolute_import, print_function, division
 
-from .parse_common import parse_is_article, parse_is_oa, parse_py_datetime
+from .parse_common import parse_is_article, parse_is_oa, parse_py_datetime, parse_document_types
 from .parse_categorys import parse_ecoom_categorys
 from .parse_country import parse_country, parse_collaboration_type_china, parse_lead_type_china
 from .parse_country import parse_collaboration_type, parse_first_country
@@ -13,21 +13,29 @@ from .parse_orcid import parse_orcid_info
 from .parse_address import parse_address_info
 from .parse_rid import parse_rid_info
 
+ARRAY_KEYS = [
+    'document_types',
+    'ecoom_categorys',
+    'countrys_c1',
+    'countrys_rp',
+    'countrys_c1_rp',
+    'cr_dois',
+    'tags',
+]
 
-def convert_field_type(item):
-    array_keys = [
-        'ecoom_categorys',
-        'countrys_c1',
-        'countrys_rp',
-        'countrys_c1_rp',
-        'cr_dois',
-        'tags',
-    ]
-    for key in array_keys:
+
+def add_row_type(item):
+    for key in ARRAY_KEYS:
         item[key] = item[key].split(';') if item[key] else []
     for key in item.keys():
         if str(item[key]) == 'nan':
             item[key] = None
+
+
+def remove_row_type(item):
+    for key in ARRAY_KEYS:
+        if type(item[key]) is list:
+            item[key] = ';'.join([str(i) for i in item[key]])
 
 
 def parse_version1(items):
@@ -47,6 +55,7 @@ def parse_version1(items):
 
     for row in items:
         row['parser_version'] = 1
+        row['document_types'] = parse_document_types(row)
         row['is_article'] = parse_is_article(row)
         row['is_oa'] = parse_is_oa(row)
         row['py_datetime'] = parse_py_datetime(row)
@@ -67,4 +76,4 @@ def parse_version1(items):
         row['orcid_info'] = parse_orcid_info(row.get('OI', ''))
         row['rid_info'] = parse_rid_info(row.get('RI', ''))
 
-        convert_field_type(row)
+        add_row_type(row)

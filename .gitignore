@@ -45,3 +45,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# my
+scilib/scripts/README_SECRET.md
