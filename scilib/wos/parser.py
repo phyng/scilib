@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals, absolute_import, print_function, division
 
-from .parse_common import parse_is_article, parse_is_oa, parse_py_datetime
+from .parse_common import parse_is_article, parse_is_oa, parse_py_datetime, parse_document_types
 from .parse_categorys import parse_ecoom_categorys
 from .parse_country import parse_country, parse_collaboration_type_china, parse_lead_type_china
 from .parse_country import parse_collaboration_type, parse_first_country
@@ -14,6 +14,7 @@ from .parse_address import parse_address_info
 from .parse_rid import parse_rid_info
 
 ARRAY_KEYS = [
+    'document_types',
     'ecoom_categorys',
     'countrys_c1',
     'countrys_rp',
@@ -54,6 +55,7 @@ def parse_version1(items):
 
     for row in items:
         row['parser_version'] = 1
+        row['document_types'] = parse_document_types(row)
         row['is_article'] = parse_is_article(row)
         row['is_oa'] = parse_is_oa(row)
         row['py_datetime'] = parse_py_datetime(row)
