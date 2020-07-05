@@ -21,7 +21,7 @@ def es_callback(path, index):
 
 
 def csv_callback(path, fields, tag, py_from, py_to):
-    fields = fields.split(',')
+    fields = [i for i in fields.split(',') if i]
 
     items = read_text_format_path(path)
     parse_version1(items)
@@ -34,7 +34,7 @@ def csv_callback(path, fields, tag, py_from, py_to):
 
     for item in items:
         remove_row_type(item)
-    return [{k: v for k, v in item.items() if k in fields} for item in items]
+    return [{k: v for k, v in item.items() if not fields or k in fields} for item in items]
 
 
 def count_callback(path):
@@ -86,7 +86,7 @@ def run():
     parser.add_option("--from", action="store", type="str", dest="from_dir", default=".")
     parser.add_option("--to", action="store", type="str", dest="to", default="count")
     parser.add_option("--index", action="store", type="str", dest="index", default="wos")
-    parser.add_option("--fields", action="store", type="str", dest="fields", default="UT")
+    parser.add_option("--fields", action="store", type="str", dest="fields", default="")
 
     parser.add_option("--tag", action="store", type="str", dest="tag", default=None)
     parser.add_option("--py_from", action="store", type="str", dest="py_from", default=None)
