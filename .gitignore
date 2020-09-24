@@ -48,5 +48,6 @@ env.bak/
 venv.bak/
 
 # my
+sync.sh
 scilib/scripts/README_SECRET.md
 scilib/gender/data/
