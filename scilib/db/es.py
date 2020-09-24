@@ -10,7 +10,7 @@ ES_API = os.environ.get('ES_API', 'http://localhost:9205')
 ES_BULK_API = f'{ES_API}/_bulk'
 
 
-def index_or_update_rows(rows, *, index="wos", action="index"):
+def index_or_update_rows(rows, *, index="wos", action="index", pk="UT"):
     """ index_or_update_rows
 
     https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
@@ -22,7 +22,7 @@ def index_or_update_rows(rows, *, index="wos", action="index"):
         lines.append({
             action: {
                 "_index": index,
-                "_id": row["UT"],
+                "_id": row[pk],
             }
         })
         if action == "update":

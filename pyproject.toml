@@ -26,6 +26,8 @@ scipy = "^1.4.1"
 requests = "^2.23.0"
 openpyxl = "^3.0.3"
 orjson = "^3.2.1"
+nltk = "^3.5"
+pypinyin = "^0.38.1"
 
 [tool.poetry.dev-dependencies]
 sphinx = "^2.4.4"
