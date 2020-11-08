@@ -60,14 +60,14 @@ def read_text_format_dir(from_dir):
         yield from parse_txt_file(file)
 
 
-def collect_keywords(items, keyword_replace_map=None):
+def collect_keywords(items, keyword_field='Keyword', year_field='Year', keyword_replace_map=None, top_size=50):
     keyword_replace_map = keyword_replace_map or {}
     keywords = []
     keywords_map = {}
     tokens_list = []
     for item in items:
-        keyword = item.get('Keyword', '') or ''
-        year = item.get('Year', '') or ''
+        keyword = item.get(keyword_field, '') or ''
+        year = item.get(year_field, '') or ''
         if str(keyword) == 'nan' or str(year) == 'nan' or len(str(int(year))) != 4:
             continue
         tokens = re.split(r'[,;，]', keyword)
@@ -78,7 +78,7 @@ def collect_keywords(items, keyword_replace_map=None):
     counter = Counter(keywords)
     counter_map = {k: Counter(v) for k, v in keywords_map.items()}
 
-    top_n = [k for k, v in counter.most_common(50)]
+    top_n = [k for k, v in counter.most_common(top_size)]
     print(top_n)
     years_items = []
     years_items_flat = []
@@ -98,7 +98,7 @@ def collect_keywords(items, keyword_replace_map=None):
                 dict(year=year, keyword1=keyword1, keyword2=keyword2)
                 for year, tokens in tokens_list if keyword1 in tokens and keyword2 in tokens
             ])
-            if (index + 1) == 50:
+            if (index + 1) == top_size:
                 print(str(count), end='')
             else:
                 print(str(count) + ',', end='')
