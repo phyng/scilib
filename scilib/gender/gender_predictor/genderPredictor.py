@@ -1,8 +1,8 @@
 # coding: utf-8
 
-from nltk import NaiveBayesClassifier, classify
-import USSSALoader
 import random
+from nltk import NaiveBayesClassifier, classify
+from .USSSALoader import getNameList
 
 
 class genderPredictor:
@@ -69,7 +69,7 @@ class genderPredictor:
         return self.classifier.most_informative_features(n)
 
     def _loadNames(self):
-        return USSSALoader.getNameList()
+        return getNameList()
 
     def _nameFeatures(self, name):
         name = name.upper()

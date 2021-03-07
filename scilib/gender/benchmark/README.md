@@ -1,0 +1,10 @@
+
+# benckmark
+
+## benchmark result
+
+<!-- BENCHMARK_START -->
+| name             |   total_count |   male-male |   male-female |   male-unknown |   female-male |   female-female |   female-unknown |   accuracy |
+|:-----------------|--------------:|------------:|--------------:|---------------:|--------------:|----------------:|-----------------:|-----------:|
+| gender_predictor |         58904 |       37542 |          8780 |              0 |          2948 |            9634 |                0 |   0.800896 |
+<!-- BENCHMARK_END -->

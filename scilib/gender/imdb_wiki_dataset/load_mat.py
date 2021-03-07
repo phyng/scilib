@@ -10,6 +10,7 @@ from scipy.io import loadmat
 BASE_DIR = os.path.dirname(__file__)
 WIKI_MAT_PATH = os.path.join(BASE_DIR, 'data/wiki.mat')
 WIKI_CSV_PATH = os.path.join(BASE_DIR, 'data/wiki.csv')
+WIKI_GENDER_TEST_CSV_PATH = os.path.join(BASE_DIR, 'data/wiki_gender_test.csv')
 
 
 def mat_data_to_csv():
@@ -41,6 +42,13 @@ def mat_data_to_csv():
     df = pd.DataFrame(np_data)
     df.columns = fields
     df.to_csv(WIKI_CSV_PATH, index=False)
+
+    # gender test
+    items = []
+    for index, row in df.iterrows():
+        if row['name'] and row['gender'] in [0, 1]:
+            items.append(dict(name=row['name'], gender='male' if row['gender'] == 1 else 'female'))
+    pd.DataFrame.from_records(items).to_csv(WIKI_GENDER_TEST_CSV_PATH, index=False)
 
 
 if __name__ == '__main__':
