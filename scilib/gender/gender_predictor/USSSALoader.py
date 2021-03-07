@@ -13,20 +13,19 @@ FILE_ZIP = os.path.join(BASE_DIR, "data/names.zip")
 
 def getNameList():
     if not os.path.exists(FILE_PICKLE):
-        print("names.pickle does not exist, generating")
+        # print("names.pickle does not exist, generating")
         if not os.path.exists(FILE_ZIP):
             print("names.zip does not exist, downloading from github")
             downloadNames()
         else:
             print("names.zip exists, not downloading")
 
-        print("Extracting names from names.zip")
+        # print("Extracting names from names.zip")
         namesDict = extractNamesDict()
-
         maleNames = list()
         femaleNames = list()
 
-        print("Sorting Names")
+        # print("Sorting Names")
         for name in namesDict:
             counts = namesDict[name]
             tuple = (name, counts[0], counts[1])

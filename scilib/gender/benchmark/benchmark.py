@@ -7,6 +7,9 @@ import re
 import pandas as pd
 from scilib.gender.imdb_wiki_dataset.public import load_test_data
 from scilib.gender.gender_predictor.public import batch_classify as batch_classify1
+from scilib.gender.gender_guesser_pypi.public import batch_classify as batch_classify2
+from scilib.gender.genderizer_pypi.public import batch_classify as batch_classify3
+from scilib.gender.agefromname_pypi.public import batch_classify as batch_classify4
 
 BASE_DIR = os.path.dirname(__file__)
 CSV_PATH = os.path.join(BASE_DIR, 'results.csv')
@@ -29,8 +32,14 @@ def _get_result_summary(test_data, results):
             raise ValueError(key)
         metrics[key] += 1
 
-    metrics['accuracy'] = (metrics['male-male'] + metrics['female-female']) / metrics['total_count']
-    return metrics
+    m = metrics
+    m['accuracy1'] = (m['male-male'] + m['female-female']) / m['total_count']
+    m['accuracy2'] = (m['male-male'] + m['female-female']) / (m['male-female'] + m['female-male'] + m['male-male'] + m['female-female'])  # noqa
+    m['score1'] = (m['male-female'] + m['male-unknown'] + m['female-male'] + m['female-unknown']) / m['total_count']
+    m['score2'] = (m['male-female'] + m['female-male']) / (m['male-female'] + m['female-male'] + m['male-male'] + m['female-female'])  # noqa
+    m['score3'] = (m['male-unknown'] + m['female-unknown']) / m['total_count']
+    m['score4'] = (m['male-female'] - m['female-male']) / (m['male-female'] + m['female-male'] + m['male-male'] + m['female-female']) # noqa
+    return m
 
 
 def run():
@@ -38,6 +47,9 @@ def run():
     names = [item['name'] for item in test_data]
     configs = [
         ['gender_predictor', batch_classify1],
+        ['gender_guesser', batch_classify2],
+        ['genderizer', batch_classify3],
+        ['agefromname', batch_classify4],
     ]
     benchmark_results = []
     for name, method in configs:
