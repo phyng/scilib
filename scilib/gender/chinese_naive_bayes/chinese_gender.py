@@ -118,7 +118,7 @@ class ChineseGenderPredictor(object):
     def predict(self, name):
         features = self.get_name_full_features(name)
         if not features:
-            return None
+            return None, None
         return self.classifier.prob_classify(features).prob('M'), self.classifier.prob_classify(features).prob('F')
 
 
