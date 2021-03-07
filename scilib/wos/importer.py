@@ -40,7 +40,15 @@ def _read_text_format_lines(lines):
     return items
 
 
-def read_text_format_path(path):
+def read_text_format_path(path, *, export_type='other_text'):
+    """ Read data from path
+
+    export_type: other_text | fast5k_csv
+    """
+    if export_type == 'fast5k_csv':
+        df = pd.read_csv(path, sep='\t', index_col=False)
+        return [dict(row) for i, row in df.iterrows()]
+
     with open(path, 'r', encoding='utf-8-sig') as f:
         lines = f.read().split('\n')
     try:
@@ -68,14 +76,14 @@ def scan_text_format_dir(abs_path, *, globs=None):
             yield path
 
 
-def read_text_format_dir(abs_path, *, globs=None):
+def read_text_format_dir(abs_path, *, globs=None, export_type='other_text'):
     for path in scan_text_format_dir(abs_path, globs=globs):
-        for item in read_text_format_path(path):
+        for item in read_text_format_path(path, export_type=export_type):
             yield item
 
 
-def read_text_format_dir_as_pd(abs_path, globs=None):
-    all_items = list(read_text_format_dir(abs_path, globs=globs))
+def read_text_format_dir_as_pd(abs_path, *, globs=None, export_type='other_text'):
+    all_items = list(read_text_format_dir(abs_path, globs=globs, export_type=export_type))
     return pd.DataFrame.from_records(all_items).drop_duplicates('UT')
 
 

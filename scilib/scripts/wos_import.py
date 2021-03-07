@@ -37,6 +37,10 @@ def csv_callback(path, fields, tag, py_from, py_to):
     return [{k: v for k, v in item.items() if not fields or k in fields} for item in items]
 
 
+def fast5k_csv_callback(path):
+    return read_text_format_path(path, export_type='fast5k_csv')
+
+
 def count_callback(path):
     items = read_text_format_path(path)
     return len(items)
@@ -55,7 +59,7 @@ def cr_query_callback(path, tag):
     return download_dois, cr_dois
 
 
-async def main(from_dir, to_type, index, fields, tag, py_from, py_to):
+async def main(from_dir, to_type, index, fields, export_type, tag, py_from, py_to):
     if to_type == 'es':
         await read_text_format_dir_parallel(from_dir, es_callback, index)
     elif to_type == 'count':
@@ -67,6 +71,11 @@ async def main(from_dir, to_type, index, fields, tag, py_from, py_to):
         cr_dois = set.union(*[set(li[1]) for li in results])
         new_dois = cr_dois - download_dois
         print(f'download_dois={len(download_dois)} cr_dois={len(cr_dois)} new_dois={len(new_dois)}')
+    elif to_type.endswith('.fast5k.csv'):
+        results = await read_text_format_dir_parallel(from_dir, fast5k_csv_callback)
+        df = pd.DataFrame.from_records((i for li in results for i in li)).drop_duplicates('UT')
+        print(df.shape)
+        df.to_csv(to_type)
     elif to_type.endswith('.csv'):
         results = await read_text_format_dir_parallel(from_dir, csv_callback, fields, tag, py_from, py_to)
         df = pd.DataFrame.from_records((i for li in results for i in li)).drop_duplicates('UT')
@@ -87,6 +96,7 @@ def run():
     parser.add_option("--to", action="store", type="str", dest="to", default="count")
     parser.add_option("--index", action="store", type="str", dest="index", default="wos")
     parser.add_option("--fields", action="store", type="str", dest="fields", default="")
+    parser.add_option("--export_type", action="store", type="str", dest="export_type", default="other_text")
 
     parser.add_option("--tag", action="store", type="str", dest="tag", default=None)
     parser.add_option("--py_from", action="store", type="str", dest="py_from", default=None)
@@ -94,7 +104,14 @@ def run():
 
     options, args = parser.parse_args()
     asyncio.run(main(
-        options.from_dir, options.to, options.index, options.fields, options.tag, options.py_from, options.py_to
+        options.from_dir,
+        options.to,
+        options.index,
+        options.fields,
+        options.export_type,
+        options.tag,
+        options.py_from,
+        options.py_to,
     ))
 
 
