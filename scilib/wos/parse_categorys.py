@@ -22,7 +22,11 @@ SSH_CATEGORYS_SET = set([
 def _get_wc_ecoom_map_lower():
     df_ecoom_category = pd.read_excel(os.path.join(BASE_DIR, 'configs/ecoom_category_20190806.xlsx'))
     wc_ecoom_map = {row['WC']: row['ECOOM'] for i, row in df_ecoom_category.iterrows()}
-    wc_ecoom_map_lower = {k.lower().strip(): v.lower().strip() for k, v in wc_ecoom_map.items()}
+    wc_ecoom_map_lower = {
+        k.lower().strip(): v.lower().strip()
+        for k, v in wc_ecoom_map.items()
+        if k and str(k) != 'nan'
+    }
     return wc_ecoom_map_lower
 
 
