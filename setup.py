@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="scilib",
-    version="0.0.11",
+    version="0.0.13",
     author="phyng",
     author_email="phyngk@gmail.com",
     description="scilib",
