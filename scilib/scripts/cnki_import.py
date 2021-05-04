@@ -9,6 +9,12 @@ import asyncio
 import pandas as pd
 from optparse import OptionParser
 from scilib.cnki.importer import read_text_format_dir, read_spider_format_dir, collect_keywords
+from scilib.cnki.importer import read_spider_format, read_spider_format_dir_parallel
+
+
+def es_callback(path):
+    items = list(read_spider_format(path))
+    print(len(items))
 
 
 async def main(from_dir, to, from_type, to_type):
@@ -20,11 +26,13 @@ async def main(from_dir, to, from_type, to_type):
         items = read_spider_format_dir(from_dir)
         df = pd.DataFrame.from_records(items)
         df = df.drop_duplicates(subset=['Title'])
+    elif from_type == 'spider_parallel':
+        await read_spider_format_dir_parallel(from_dir, callback=es_callback)
     else:
         raise ValueError(f'unknown from type: {from_type}')
 
-    print('df.shape', df.shape)
     if to_type == 'corr':
+        print('df.shape', df.shape)
         df.to_excel(to)
         counter, counter_map, years_items_flat, corrs = collect_keywords([dict(i) for index, i in df.iterrows()])
         counter_items = [dict(k=k, v=v) for k, v in counter.most_common()]
@@ -34,6 +42,8 @@ async def main(from_dir, to, from_type, to_type):
         pd.DataFrame.from_records(corrs).to_csv(to + '.corrs.csv')
     elif to_type == 'excel':
         df.to_excel(to)
+    elif to_type == 'none':
+        pass
     else:
         raise ValueError(f'unknown to type: {to_type}')
 

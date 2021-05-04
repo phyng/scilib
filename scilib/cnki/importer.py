@@ -5,6 +5,8 @@ from __future__ import unicode_literals, absolute_import, print_function, divisi
 import os
 import re
 import json
+import asyncio
+import concurrent
 from pathlib import Path
 from collections import Counter
 from pyquery import PyQuery
@@ -65,60 +67,84 @@ def read_text_format_dir(from_dir):
         yield from parse_txt_file(file)
 
 
-def read_spider_format_dir(from_dir):
-    print('from_dir', from_dir)
-    for file in Path(from_dir).glob('**/end'):
-        print('file', file)
-        base_dir = os.path.dirname(file)
-        files = os.listdir(base_dir)
-        txt_file = [i for i in files if i.endswith('.txt')][0]
-        htmls_file = [i for i in files if i.endswith('.json')][0]
-        items = parse_txt_file(os.path.join(base_dir, txt_file))
+def read_spider_format(file_path):
+    print('file_path', file_path)
+    base_dir = os.path.dirname(file_path)
+    files = os.listdir(base_dir)
+    txt_file = [i for i in files if i.endswith('.txt')][0]
+    htmls_file = [i for i in files if i.endswith('.json')][0]
+    items = parse_txt_file(os.path.join(base_dir, txt_file))
 
-        with open(os.path.join(base_dir, htmls_file)) as f:
-            htmls = json.load(f)['htmls']
+    with open(os.path.join(base_dir, htmls_file)) as f:
+        htmls = json.load(f)['htmls']
 
-        list_items = []
-        for html in htmls:
-            for row in PyQuery(html).find('tr'):
-                pq_row = PyQuery(row)
-                list_name = pq_row.find('.name a').text().strip()
-                if not list_name:
-                    continue
-                list_marktip = pq_row.find('.name .marktip').text().strip()
-                list_author = pq_row.find('.author').text().strip()
-                list_source = pq_row.find('.source').text().strip()
-                list_date = pq_row.find('.date').text().strip()
-                list_data = pq_row.find('.data').text().strip()
-                list_quote = int(pq_row.find('.quote').text().strip() or 0)
-                list_download = int(pq_row.find('.download').text().strip() or 0)
-                # print(
-                #     f'list_name={list_name} list_marktip={list_marktip} list_author={list_author}'
-                #     f'list_source={list_source} list_date={list_date} list_data={list_data}'
-                #     f'list_quote={list_quote} list_download={list_download}'
-                # )
-                list_item = dict(
-                    list_name=list_name,
-                    list_marktip=list_marktip,
-                    list_author=list_author,
-                    list_source=list_source,
-                    list_date=list_date,
-                    list_data=list_data,
-                    list_quote=list_quote,
-                    list_download=list_download,
-                )
-                list_items.append(list_item)
+    list_items = []
+    for html in htmls:
+        for row in PyQuery(html).find('tr'):
+            pq_row = PyQuery(row)
+            list_name = pq_row.find('.name a').text().strip()
+            if not list_name:
+                continue
+            list_marktip = pq_row.find('.name .marktip').text().strip()
+            list_author = pq_row.find('.author').text().strip()
+            list_source = pq_row.find('.source').text().strip()
+            list_date = pq_row.find('.date').text().strip()
+            list_data = pq_row.find('.data').text().strip()
+            list_quote = int(pq_row.find('.quote').text().strip() or 0)
+            list_download = int(pq_row.find('.download').text().strip() or 0)
+            # print(
+            #     f'list_name={list_name} list_marktip={list_marktip} list_author={list_author}'
+            #     f'list_source={list_source} list_date={list_date} list_data={list_data}'
+            #     f'list_quote={list_quote} list_download={list_download}'
+            # )
 
+            icon_collect = pq_row.find('.icon-collect')[0]
+            list_dbname = icon_collect.attrib['data-dbname']
+            list_filename = icon_collect.attrib['data-filename']
+            list_id = f'dbname={list_dbname}&filename={list_filename}'
+
+            list_item = dict(
+                list_name=list_name,
+                list_marktip=list_marktip,
+                list_author=list_author,
+                list_source=list_source,
+                list_date=list_date,
+                list_data=list_data,
+                list_quote=list_quote,
+                list_download=list_download,
+                list_dbname=list_dbname,
+                list_filename=list_filename,
+                list_id=list_id,
+            )
+            list_items.append(list_item)
+
+    if len(items) != len(list_items):
         print('len(items)', len(items))
         print('len(list_items)', len(list_items))
-        if len(items) != len(list_items):
-            print('=' * 20, 'error: list items length error', '=' * 20)
-            # raise ValueError('list items length error')
-            continue
-        for item, list_item in zip(items, list_items):
-            item.update(list_item)
+        print('error: list items length error', '=' * 50)
+        # raise ValueError('list items length error')
+        yield from iter([])
+    for item, list_item in zip(items, list_items):
+        item.update(list_item)
 
-        yield from iter(items)
+    yield from iter(items)
+
+
+def read_spider_format_dir(from_dir):
+    for file in Path(from_dir).glob('**/end'):
+        yield from read_spider_format(file)
+
+
+async def read_spider_format_dir_parallel(from_dir, callback, *args):
+    """ parallel read
+    """
+    loop = asyncio.get_running_loop()
+    futures = []
+    with concurrent.futures.ProcessPoolExecutor() as pool:
+        for file_path in Path(from_dir).glob('**/end'):
+            future = loop.run_in_executor(pool, callback, file_path, *args)
+            futures.append(future)
+    return await asyncio.gather(*futures, return_exceptions=False)
 
 
 def collect_keywords(items, keyword_field='Keyword', year_field='Year', keyword_replace_map=None, top_size=50):
