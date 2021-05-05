@@ -6,6 +6,7 @@ import os
 import re
 import json
 import asyncio
+import datetime
 import concurrent
 from pathlib import Path
 from collections import Counter
@@ -67,6 +68,18 @@ def read_text_format_dir(from_dir):
         yield from parse_txt_file(file)
 
 
+def _parse_list_date(list_date):
+    try:
+        list_date = list_date.split()[0]
+        tokens = list_date.split('-')
+        y = int(tokens[0])
+        m = int(tokens[1])
+        d = int(tokens[2])
+        return datetime.date(y, m, d).strftime(r'%Y-%m-%d')
+    except Exception:
+        return None
+
+
 def read_spider_format(file_path):
     print('file_path', file_path)
     base_dir = os.path.dirname(file_path)
@@ -103,12 +116,17 @@ def read_spider_format(file_path):
             list_filename = icon_collect.attrib['data-filename']
             list_id = f'dbname={list_dbname}&filename={list_filename}'
 
+            list_date_format = _parse_list_date(list_date)
+            if not list_date_format:
+                print('list_date_format error:', list_date, list_date_format)
+
             list_item = dict(
                 list_name=list_name,
                 list_marktip=list_marktip,
                 list_author=list_author,
                 list_source=list_source,
                 list_date=list_date,
+                list_date_format=_parse_list_date(list_date),
                 list_data=list_data,
                 list_quote=list_quote,
                 list_download=list_download,
