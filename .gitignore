@@ -53,3 +53,5 @@ scilib/scripts/README_SECRET.md
 scilib/gender/chinese_naive_bayes/data/
 scilib/gender/gender_predictor/data/
 scilib/gender/imdb_wiki_dataset/data/
+
+scilib/cnki/data/

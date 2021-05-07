@@ -41,9 +41,9 @@ def index_or_update_rows(rows, *, index="wos", action="index", pk="UT"):
 
     if 'errors' not in response_json:
         print(response_json)
-        raise ValueError()
+        raise ValueError(response_json)
     elif response_json['errors']:
         print(response_json)
-        raise ValueError()
+        raise ValueError(response_json)
     else:
         print('took', response_json['took'])

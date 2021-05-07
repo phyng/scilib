@@ -14,6 +14,8 @@ classifiers = [
 
 [tool.poetry.scripts]
 scilib-wos-import = "scilib.scripts.wos_import:run"
+scilib-cnki-import = "scilib.scripts.cnki_import:run"
+scilib-db-trans = "scilib.scripts.db_trans:run"
 scilib-gender-benchmark = "scilib.gender.benchmark.benchmark:run"
 
 [tool.poetry.dependencies]
@@ -34,6 +36,7 @@ tabulate = "^0.8.9"
 agefromname = "^0.0.8"
 genderizer = "^0.1.2"
 naiveBayesClassifier = "^0.1.3"
+pyquery = "^1.4.3"
 
 [tool.poetry.dev-dependencies]
 sphinx = "^2.4.4"
