@@ -103,8 +103,12 @@ def read_spider_format(file_path):
             list_source = pq_row.find('.source').text().strip()
             list_date = pq_row.find('.date').text().strip()
             list_data = pq_row.find('.data').text().strip()
-            list_quote = int(pq_row.find('.quote').text().strip() or 0)
-            list_download = int(pq_row.find('.download').text().strip() or 0)
+
+            try:
+                list_quote = int(pq_row.find('.quote').text().strip() or 0)
+                list_download = int(pq_row.find('.download').text().strip() or 0)
+            except (ValueError, TypeError):
+                continue
             # print(
             #     f'list_name={list_name} list_marktip={list_marktip} list_author={list_author}'
             #     f'list_source={list_source} list_date={list_date} list_data={list_data}'

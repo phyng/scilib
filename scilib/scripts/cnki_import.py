@@ -14,9 +14,13 @@ from scilib.db.es import index_or_update_rows
 
 
 def es_callback(path):
-    items = list(read_spider_format(path))
-    print(len(items))
-    index_or_update_rows(items, index='cnki_nsfc', action='index', pk='list_id')
+    try:
+        items = list(read_spider_format(path))
+        print(len(items))
+        index_or_update_rows(items, index='cnki_nsfc', action='index', pk='list_id')
+    except Exception as e:
+        print(e)
+        return
 
 
 async def main(from_dir, to, from_type, to_type):

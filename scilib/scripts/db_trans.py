@@ -6,7 +6,7 @@
 from __future__ import unicode_literals, absolute_import, print_function, division
 
 from optparse import OptionParser
-from scilib.db.trans import pgcsv_to_items, pgcsv_to_es
+from scilib.db.trans import pgcsv_to_items, pgcsv_to_es, ndjsongz_to_es
 
 
 def run():
@@ -24,7 +24,8 @@ def run():
     trans_type = f'{options.from_type}_to_{options.to_type}'
     trans_funcs = {
         'pgcsv_to_items': lambda options: pgcsv_to_items(options.from_path),
-        'pgcsv_to_es': lambda options: pgcsv_to_es(options.from_path, options.es_index, options.es_pk)
+        'pgcsv_to_es': lambda options: pgcsv_to_es(options.from_path, options.es_index, options.es_pk),
+        'ndjsongz_to_es': lambda options: ndjsongz_to_es(options.from_path, options.es_index, options.es_pk)
     }
     print('trans_type:', trans_type)
     if trans_type not in trans_funcs:
