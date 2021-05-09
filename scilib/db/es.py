@@ -5,6 +5,7 @@ from __future__ import unicode_literals, absolute_import, print_function, divisi
 import os
 import json
 import requests
+from libs.iterlib import chunks
 
 ES_API = os.environ.get('ES_API', 'http://localhost:9205')
 ES_BULK_API = f'{ES_API}/_bulk'
@@ -15,6 +16,11 @@ def index_or_update_rows(rows, *, index="wos", action="index", pk="UT"):
 
     https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
     """
+    for chunk in chunks(rows, size=2000):
+        _index_or_update_rows(chunk, index=index, action=action, pk=pk)
+
+
+def _index_or_update_rows(rows, *, index="wos", action="index", pk="UT"):
     if not rows:
         return
     lines = []
