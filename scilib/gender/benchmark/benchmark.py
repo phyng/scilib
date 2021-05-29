@@ -11,6 +11,7 @@ from scilib.gender.gender_guesser_pypi.public import batch_classify as batch_cla
 from scilib.gender.genderizer_pypi.public import batch_classify as batch_classify3
 from scilib.gender.agefromname_pypi.public import batch_classify as batch_classify4
 from scilib.gender.gender_r.public import batch_classify as batch_classify5
+from scilib.gender.go_gender.public import batch_classify as batch_classify6
 
 BASE_DIR = os.path.dirname(__file__)
 CSV_PATH = os.path.join(BASE_DIR, 'results.csv')
@@ -52,6 +53,7 @@ def run():
         ['genderizer', batch_classify3],
         ['gender', batch_classify5],
         ['agefromname', batch_classify4],
+        ['gender@go', batch_classify6]
     ]
     benchmark_results = []
     for name, method in configs:
