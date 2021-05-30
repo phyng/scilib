@@ -14,6 +14,8 @@ from scilib.gender.gender_r.public import batch_classify as batch_classify5
 from scilib.gender.go_gender.public import batch_classify as batch_classify6
 from scilib.gender.gender_detector.public import batch_classify as batch_classify7
 
+from scilib.gender.api_genderize.public import batch_classify as batch_classify11
+
 BASE_DIR = os.path.dirname(__file__)
 CSV_PATH = os.path.join(BASE_DIR, 'results.csv')
 MD_PATH = os.path.join(BASE_DIR, 'README.md')
@@ -49,19 +51,22 @@ def run():
     test_data = load_test_data()
     names = [item['name'] for item in test_data]
     configs = [
-        ['gender_predictor', batch_classify1],
-        ['gender_guesser', batch_classify2],
-        ['genderizer', batch_classify3],
-        ['gender@R', batch_classify5],
-        ['agefromname', batch_classify4],
-        ['gender@go', batch_classify6],
-        ['gender_detector', batch_classify7],
+        ['genderize.io', batch_classify11, dict(limit=1000)],
+
+        ['gender_predictor', batch_classify1, {}],
+        ['gender_guesser', batch_classify2, {}],
+        ['genderizer', batch_classify3, {}],
+        ['gender@R', batch_classify5, {}],
+        ['agefromname', batch_classify4, {}],
+        ['gender@go', batch_classify6, {}],
+        ['gender_detector', batch_classify7, {}],
     ]
     benchmark_results = []
-    for name, method in configs:
+    for name, method, options in configs:
         print(f'\n\nbenckmark: {name} start')
-        results = method(names)
-        metrics = _get_result_summary(test_data, results)
+        limit = options.get('limit') or len(test_data)
+        results = method(names[:limit])
+        metrics = _get_result_summary(test_data[:limit], results)
         print(metrics)
         benchmark_results.append(dict(name=name, **metrics))
     df = pd.DataFrame.from_records(benchmark_results)
