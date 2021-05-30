@@ -54,6 +54,8 @@ scilib/gender/chinese_naive_bayes/data/
 scilib/gender/gender_predictor/data/
 scilib/gender/api_genderize/data/
 scilib/gender/imdb_wiki_dataset/data/
+scilib/gender/api_namsor/data/
+scilib/gender/api_namsor/secret.py
 
 scilib/cnki/data/
 

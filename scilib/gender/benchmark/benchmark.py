@@ -15,6 +15,7 @@ from scilib.gender.go_gender.public import batch_classify as batch_classify6
 from scilib.gender.gender_detector.public import batch_classify as batch_classify7
 
 from scilib.gender.api_genderize.public import batch_classify as batch_classify11
+from scilib.gender.api_namsor.public import batch_classify as batch_classify12
 
 BASE_DIR = os.path.dirname(__file__)
 CSV_PATH = os.path.join(BASE_DIR, 'results.csv')
@@ -52,6 +53,7 @@ def run():
     names = [item['name'] for item in test_data]
     configs = [
         ['genderize.io', batch_classify11, dict(limit=1000)],
+        ['namsor.com', batch_classify12, dict(limit=1000)],
 
         ['gender_predictor', batch_classify1, {}],
         ['gender_guesser', batch_classify2, {}],
