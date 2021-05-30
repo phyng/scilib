@@ -18,13 +18,16 @@ def batch_classify(names):
         if os.path.exists(file_path):
             with open(file_path) as f:
                 data = json.load(f)
-                output_results[first_name] = data['gender']
-                continue
+                if 'errno' in data:
+                    os.remove(file_path)
+                else:
+                    output_results[first_name] = data['gender']
+                    continue
         response = requests.get('https://gender-api.com/get', {'name': first_name, 'key': X_API_KEY})
         response.raise_for_status()
         data = response.json()
         print('data', data)
-        if 'gender' in data:
+        if 'errno' not in data and 'gender' in data:
             output_results[first_name] = data['gender']
             with open(file_path, 'w') as f:
                 json.dump(data, f)

@@ -55,7 +55,7 @@ def run():
     configs = [
         ['gender-api.com', batch_classify13, dict(limit=500)],
         ['genderize.io', batch_classify11, dict(limit=1000)],
-        ['namsor.com', batch_classify12, dict(limit=2000)],
+        ['namsor.com', batch_classify12, dict(limit=4000)],
 
         ['gender_predictor', batch_classify1, {}],
         ['gender_guesser', batch_classify2, {}],
