@@ -5,9 +5,12 @@
 
 from __future__ import unicode_literals, absolute_import, print_function, division
 
+import os
+import hashlib
 import asyncio
 import pandas as pd
 from optparse import OptionParser
+from scilib.iterlib import chunks
 
 from scilib.wos.importer import read_text_format_dir_parallel, read_text_format_path
 from scilib.wos.parser import parse_version1, remove_row_type
@@ -59,7 +62,20 @@ def cr_query_callback(path, tag):
     return download_dois, cr_dois
 
 
-async def main(from_dir, to_type, index, fields, export_type, tag, py_from, py_to):
+def ut_query_callback(path, to_dir):
+    items = read_text_format_path(path)
+    download_uts = set([item['UT'] for item in items if item.get('UT', '')])
+    for uts in chunks(download_uts, size=500):
+        if not uts:
+            continue
+        text = f'UT=({" or ".join(uts)})'
+        file_path = os.path.join(to_dir, hashlib.md5(text.encode('utf-8')).hexdigest() + '.txt')
+        with open(file_path, 'w') as f:
+            f.write(text)
+            print(len(uts), file_path)
+
+
+async def main(from_dir, to_type, to_dir, index, fields, export_type, tag, py_from, py_to):
     if to_type == 'es':
         await read_text_format_dir_parallel(from_dir, es_callback, index)
     elif to_type == 'count':
@@ -71,6 +87,8 @@ async def main(from_dir, to_type, index, fields, export_type, tag, py_from, py_t
         cr_dois = set.union(*[set(li[1]) for li in results])
         new_dois = cr_dois - download_dois
         print(f'download_dois={len(download_dois)} cr_dois={len(cr_dois)} new_dois={len(new_dois)}')
+    elif to_type == 'ut_query':
+        await read_text_format_dir_parallel(from_dir, ut_query_callback, to_dir)
     elif to_type.endswith('.fast5k.csv'):
         results = await read_text_format_dir_parallel(from_dir, fast5k_csv_callback)
         df = pd.DataFrame.from_records((i for li in results for i in li)).drop_duplicates('UT')
@@ -94,6 +112,7 @@ def run():
     parser = OptionParser()
     parser.add_option("--from", action="store", type="str", dest="from_dir", default=".")
     parser.add_option("--to", action="store", type="str", dest="to", default="count")
+    parser.add_option("--to-dir", action="store", type="str", dest="to_dir", default="/tmp")
     parser.add_option("--index", action="store", type="str", dest="index", default="wos")
     parser.add_option("--fields", action="store", type="str", dest="fields", default="")
     parser.add_option("--export_type", action="store", type="str", dest="export_type", default="other_text")
@@ -106,6 +125,7 @@ def run():
     asyncio.run(main(
         options.from_dir,
         options.to,
+        options.to_dir,
         options.index,
         options.fields,
         options.export_type,
