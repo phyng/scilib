@@ -13,6 +13,7 @@ from scilib.gender.agefromname_pypi.public import batch_classify as batch_classi
 from scilib.gender.gender_r.public import batch_classify as batch_classify5
 from scilib.gender.go_gender.public import batch_classify as batch_classify6
 from scilib.gender.gender_detector.public import batch_classify as batch_classify7
+from scilib.gender.gender_computer.public import batch_classify as batch_classify8
 
 from scilib.gender.api_genderize.public import batch_classify as batch_classify11
 from scilib.gender.api_namsor.public import batch_classify as batch_classify12
@@ -53,9 +54,9 @@ def run():
     test_data = load_test_data()
     names = [item['name'] for item in test_data]
     configs = [
-        ['gender-api.com', batch_classify13, dict(limit=500)],
-        ['genderize.io', batch_classify11, dict(limit=1000)],
-        ['namsor.com', batch_classify12, dict(limit=4000)],
+        ['gender-api.com', batch_classify13, dict(limit=1000)],
+        ['genderize.io', batch_classify11, dict(limit=2000)],
+        ['namsor.com', batch_classify12, dict(limit=5000)],
 
         ['gender_predictor', batch_classify1, {}],
         ['gender_guesser', batch_classify2, {}],
@@ -64,6 +65,7 @@ def run():
         ['agefromname', batch_classify4, {}],
         ['gender@go', batch_classify6, {}],
         ['gender_detector', batch_classify7, {}],
+        ['genderComputer', batch_classify8, {}],
     ]
     benchmark_results = []
     for name, method, options in configs:
