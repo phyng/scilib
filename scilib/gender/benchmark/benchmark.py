@@ -13,6 +13,7 @@ from scilib.gender.agefromname_pypi.public import batch_classify as batch_classi
 from scilib.gender.gender_r.public import batch_classify as batch_classify5
 from scilib.gender.go_gender.public import batch_classify as batch_classify6
 from scilib.gender.gender_detector.public import batch_classify as batch_classify7
+from scilib.gender.gender_computer.public import batch_classify as batch_classify8
 
 from scilib.gender.api_genderize.public import batch_classify as batch_classify11
 from scilib.gender.api_namsor.public import batch_classify as batch_classify12
@@ -64,6 +65,7 @@ def run():
         ['agefromname', batch_classify4, {}],
         ['gender@go', batch_classify6, {}],
         ['gender_detector', batch_classify7, {}],
+        ['genderComputer', batch_classify8, {}],
     ]
     benchmark_results = []
     for name, method, options in configs:
