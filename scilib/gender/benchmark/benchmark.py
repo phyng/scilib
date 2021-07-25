@@ -22,6 +22,22 @@ from scilib.gender.api_gender.public import batch_classify as batch_classify13
 BASE_DIR = os.path.dirname(__file__)
 CSV_PATH = os.path.join(BASE_DIR, 'results.csv')
 MD_PATH = os.path.join(BASE_DIR, 'README.md')
+CONFIGS = [
+    ['gender-api.com', batch_classify13, dict(limit=1000)],
+    ['genderize.io', batch_classify11, dict(limit=2000)],
+    ['namsor.com', batch_classify12, dict(limit=5000)],
+
+    ['gender_predictor', batch_classify1, {}],
+    ['gender_guesser', batch_classify2, {}],
+    ['genderizer', batch_classify3, {}],
+    ['gender@R', batch_classify5, {}],
+    ['gender@R-USA', batch_classify5, dict(dataset='usa')],
+    ['agefromname', batch_classify4, {}],
+    ['gender@go', batch_classify6, {}],
+    ['gender_detector', batch_classify7, {}],
+    ['genderComputer', batch_classify8, {}],
+]
+CONFIGS_MAP = {i[0]: i for i in CONFIGS}
 
 
 def _get_result_summary(test_data, results):
@@ -51,30 +67,18 @@ def _get_result_summary(test_data, results):
 
 
 def run():
-    test_data = load_test_data()
-    names = [item['name'] for item in test_data]
-    configs = [
-        ['gender-api.com', batch_classify13, dict(limit=1000)],
-        ['genderize.io', batch_classify11, dict(limit=2000)],
-        ['namsor.com', batch_classify12, dict(limit=5000)],
-
-        ['gender_predictor', batch_classify1, {}],
-        ['gender_guesser', batch_classify2, {}],
-        ['genderizer', batch_classify3, {}],
-        ['gender@R', batch_classify5, {}],
-        ['agefromname', batch_classify4, {}],
-        ['gender@go', batch_classify6, {}],
-        ['gender_detector', batch_classify7, {}],
-        ['genderComputer', batch_classify8, {}],
-    ]
     benchmark_results = []
-    for name, method, options in configs:
+    for name, method, options in CONFIGS:
         print(f'\n\nbenckmark: {name} start')
+        dataset = options.get('dataset') or 'wiki'
+        test_data = load_test_data(dataset)
+        names = [item['name'] for item in test_data]
         limit = options.get('limit') or len(test_data)
         results = method(names[:limit])
         metrics = _get_result_summary(test_data[:limit], results)
         print(metrics)
         benchmark_results.append(dict(name=name, **metrics))
+
     df = pd.DataFrame.from_records(benchmark_results)
     df.to_csv(CSV_PATH, index=False)
 
