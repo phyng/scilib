@@ -5,6 +5,7 @@ from __future__ import unicode_literals, absolute_import, print_function, divisi
 import os
 import json
 import subprocess
+from pathlib import Path
 
 from .base import call_batch
 from .plugin import start_with_cd, xls2dta, summary, reg, nbreg
@@ -42,8 +43,10 @@ def run(working_dir):
 
 
 def run_all(entry_dir):
-    for dir_name in os.listdir(entry_dir):
-        working_dir = os.path.join(entry_dir, dir_name)
+    # for dir_name in os.listdir(entry_dir):
+    for file in Path(entry_dir).glob('**/config.json'):
+        # working_dir = os.path.join(entry_dir, dir_name)
+        working_dir = os.path.dirname(file)
         if not (os.path.isdir(working_dir)):
             continue
         print(f'run with {working_dir}...')
