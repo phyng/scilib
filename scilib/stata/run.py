@@ -33,13 +33,17 @@ def run(working_dir):
     do_file = os.path.join(working_dir, 'run.do')
     with open(do_file, 'w') as f:
         f.write(do_content)
-    subprocess.call([
-        STATA_ENTRY,
-        '-b',
-        '-e',
-        'do',
-        'run.do'
-    ], cwd=working_dir)
+
+    try:
+        subprocess.call([
+            STATA_ENTRY,
+            '-b',
+            '-e',
+            'do',
+            'run.do'
+        ], cwd=working_dir, timeout=3 * 60)
+    except subprocess.TimeoutExpired:
+        print('subprocess.TimeoutExpired')
 
 
 def run_all(entry_dir):
@@ -50,6 +54,10 @@ def run_all(entry_dir):
         if not (os.path.isdir(working_dir)):
             continue
         print(f'run with {working_dir}...')
+        run_log = os.path.join(working_dir, 'run.log')
+        if os.path.exists(run_log):
+            print(f'ignore {working_dir}')
+            continue
         run(working_dir)
 
 
