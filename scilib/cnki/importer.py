@@ -11,6 +11,7 @@ import concurrent
 from pathlib import Path
 from collections import Counter
 from pyquery import PyQuery
+from libs.iterlib import uniqify
 
 FIELDS = [
     'SrcDatabase',
@@ -29,6 +30,13 @@ FIELDS = [
     'PageCount',
     'CLC',
 ]
+
+
+def parse_fu_tokens(row):
+    if row.get('Fund', '') and str(row['Fund']) != 'nan':
+        tokens = [re.sub(r'[^a-zA-Z0-9]', '', i) for i in re.split(r'[^a-zA-Z0-9]', row['Fund'])]
+        return list(uniqify([i for i in tokens if i]))
+    return []
 
 
 def parse_txt_file(file_path):
@@ -148,6 +156,10 @@ def read_spider_format(file_path):
         yield from iter([])
     for item, list_item in zip(items, list_items):
         item.update(list_item)
+
+    for item in items:
+        if item.get('Fund'):
+            item['fu_tokens'] = parse_fu_tokens(item)
 
     yield from iter(items)
 
