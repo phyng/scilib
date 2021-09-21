@@ -18,13 +18,15 @@ def run():
 
     parser.add_option("--es-index", action="store", type="str", dest="es_index", default="")
     parser.add_option("--es-pk", action="store", type="str", dest="es_pk", default="")
+    parser.add_option("--json-fields", action="store", type="str", dest="json_fields", default="")
 
     options, args = parser.parse_args()
     print('options', options)
     trans_type = f'{options.from_type}_to_{options.to_type}'
+    json_fields = [i for i in options.json_fields.split(',') if i]
     trans_funcs = {
-        'pgcsv_to_items': lambda options: pgcsv_to_items(options.from_path),
-        'pgcsv_to_es': lambda options: pgcsv_to_es(options.from_path, options.es_index, options.es_pk),
+        'pgcsv_to_items': lambda options: pgcsv_to_items(options.from_path, json_fields),
+        'pgcsv_to_es': lambda options: pgcsv_to_es(options.from_path, options.es_index, options.es_pk, json_fields),
         'ndjsongz_to_es': lambda options: ndjsongz_to_es(options.from_path, options.es_index, options.es_pk)
     }
     print('trans_type:', trans_type)
