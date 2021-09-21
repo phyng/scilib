@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scilib"
-version = "0.0.13"
+version = "0.0.14"
 description = "scilib"
 license = "MIT"
 readme = "README.md"
@@ -41,6 +41,8 @@ libs = "^0.0.10"
 jupyterlab = "^3.0.16"
 nameparser = "^1.0.6"
 Unidecode = "^1.2.0"
+aiohttp = "^3.7.4"
+redis = "^3.5.3"
 
 [tool.poetry.dev-dependencies]
 sphinx = "^2.4.4"

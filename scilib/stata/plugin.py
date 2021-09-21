@@ -46,5 +46,14 @@ def nbreg(var_list, word_file='mytable.docx'):
             reg2docx m1 using REPLACE_WORE_FILE,         ///
             b(%5.3f) t(%5.3f) scalars(N p(%9.3f))   ///
             title("表1: 负二项回归输出") mtitles("模型") append
-        """.replace('REPLACE_WORE_FILE', word_file))
+        """.replace('REPLACE_WORE_FILE', word_file)),
+        call('reg', var_list),
+        call('estat imtest, white'),
+        call('reg', var_list, ', vce(robust)'),
+        call('est store m2'),
+        call("""
+            reg2docx m2 using REPLACE_WORE_FILE,         ///
+            b(%5.3f) se(%9.2f) scalars(N p(%9.3f))   ///
+            title("表2: 线性回归模型") mtitles("模型") append
+        """.replace('REPLACE_WORE_FILE', word_file)),
     )

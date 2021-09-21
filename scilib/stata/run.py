@@ -5,6 +5,7 @@ from __future__ import unicode_literals, absolute_import, print_function, divisi
 import os
 import json
 import subprocess
+from pathlib import Path
 
 from .base import call_batch
 from .plugin import start_with_cd, xls2dta, summary, reg, nbreg
@@ -32,21 +33,31 @@ def run(working_dir):
     do_file = os.path.join(working_dir, 'run.do')
     with open(do_file, 'w') as f:
         f.write(do_content)
-    subprocess.call([
-        STATA_ENTRY,
-        '-b',
-        '-e',
-        'do',
-        'run.do'
-    ], cwd=working_dir)
+
+    try:
+        subprocess.call([
+            STATA_ENTRY,
+            '-b',
+            '-e',
+            'do',
+            'run.do'
+        ], cwd=working_dir, timeout=3 * 60)
+    except subprocess.TimeoutExpired:
+        print('subprocess.TimeoutExpired')
 
 
 def run_all(entry_dir):
-    for dir_name in os.listdir(entry_dir):
-        working_dir = os.path.join(entry_dir, dir_name)
+    # for dir_name in os.listdir(entry_dir):
+    for file in Path(entry_dir).glob('**/config.json'):
+        # working_dir = os.path.join(entry_dir, dir_name)
+        working_dir = os.path.dirname(file)
         if not (os.path.isdir(working_dir)):
             continue
         print(f'run with {working_dir}...')
+        run_log = os.path.join(working_dir, 'run.log')
+        if os.path.exists(run_log):
+            print(f'ignore {working_dir}')
+            continue
         run(working_dir)
 
 
