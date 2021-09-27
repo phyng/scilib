@@ -59,6 +59,7 @@ scilib/gender/api_namsor/secret.py
 scilib/gender/api_gender/data/
 scilib/gender/api_gender/secret.py
 scilib/gender/gender_computer/genderComputer/
+scilib/altmetric/README_SECRET.md
 
 scilib/cnki/data/
 
