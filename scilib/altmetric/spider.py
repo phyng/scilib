@@ -14,6 +14,8 @@ ENV_STORAGE_ROOT = os.environ.get('ENV_STORAGE_ROOT') or '/tmp'
 ENV_DOI_LIST_KEY = os.environ.get('ENV_DOI_LIST_KEY') or 'scilib-altmetric-doi-list'
 ENV_DOI_ERROR_KEY = os.environ.get('ENV_DOI_ERROR_KEY') or 'scilib-altmetric-doi-error'
 ALL_PROXY = os.environ.get('all_proxy') or 'socks5://127.0.0.1:5913'
+ENV_REDIS_HOST = os.environ.get('ENV_REDIS_HOST') or '127.0.0.1'
+ENV_REDIS_PORT = os.environ.get('ENV_REDIS_PORT') or '6379'
 
 
 def get_random_ua():
@@ -55,16 +57,19 @@ def get_storage_path(doi):
 def run(doi):
     dir_path, path = get_storage_path(doi)
     if os.path.exists(path):
-        return True
+        return 'EXISTS'
     data = request(doi)
     os.makedirs(dir_path, exist_ok=True)
     with open(path, 'w') as f:
         json.dump(data, f)
-    return True
+
+    if data is None:
+        return 'NONE'
+    return data.get('details_url')
 
 
 def dispatch():
-    client = redis.StrictRedis()
+    client = redis.StrictRedis(host=ENV_REDIS_HOST, port=ENV_REDIS_PORT)
     stop = False
     count = 0
     while not stop:
@@ -77,13 +82,13 @@ def dispatch():
         count += 1
         try:
             print(f'{count} run: {doi}')
-            run(doi)
+            result = run(doi)
             time.sleep(1)
         except Exception as e:
             print(f'{count} error: {doi} {e}')
             client.lpush(ENV_DOI_ERROR_KEY, doi)  # ->|...|->
         else:
-            print(f'{count} success: {doi}')
+            print(f'{count} success: {doi} {result}')
 
 
 def main():
