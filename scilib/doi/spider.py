@@ -10,12 +10,14 @@ import redis
 import requests
 import hashlib
 
+ENV_API_FORMAT = os.environ.get('ENV_API_FORMAT') or 'https://doi.org/api/handles/{doi}'
 ENV_STORAGE_ROOT = os.environ.get('ENV_STORAGE_ROOT') or '/tmp'
-ENV_DOI_LIST_KEY = os.environ.get('ENV_DOI_LIST_KEY') or 'scilib-altmetric-doi-list'
-ENV_DOI_ERROR_KEY = os.environ.get('ENV_DOI_ERROR_KEY') or 'scilib-altmetric-doi-error'
+ENV_DOI_LIST_KEY = os.environ.get('ENV_DOI_LIST_KEY') or 'scilib-doi-list'
+ENV_DOI_ERROR_KEY = os.environ.get('ENV_DOI_ERROR_KEY') or 'scilib-doi-error'
 ALL_PROXY = os.environ.get('all_proxy') or 'socks5://127.0.0.1:5913'
 ENV_REDIS_HOST = os.environ.get('ENV_REDIS_HOST') or '127.0.0.1'
 ENV_REDIS_PORT = os.environ.get('ENV_REDIS_PORT') or '6379'
+ENV_DISPLAY_FIELD = os.environ.get('ENV_DISPLAY_FIELD') or 'details_url'
 
 
 def get_random_ua():
@@ -27,7 +29,7 @@ def get_random_ua():
 
 
 def request(doi):
-    url = f'https://api.altmetric.com/v1/doi/{doi}'
+    url = ENV_API_FORMAT.replace('{doi}', doi)
     r = requests.get(
         url,
         headers={
@@ -65,7 +67,7 @@ def run(doi):
 
     if data is None:
         return 'NONE'
-    return data.get('details_url')
+    return data.get(ENV_DISPLAY_FIELD)
 
 
 def dispatch():
@@ -83,10 +85,12 @@ def dispatch():
         try:
             print(f'{count} run: {doi}')
             result = run(doi)
-            time.sleep(1)
+            if result != 'EXISTS':
+                time.sleep(1)
         except Exception as e:
             print(f'{count} error: {doi} {e}')
             client.lpush(ENV_DOI_ERROR_KEY, doi)  # ->|...|->
+            time.sleep(1)
         else:
             print(f'{count} success: {doi} {result}')
 
