@@ -94,12 +94,13 @@ def read_spider_format(file_path):
     files = os.listdir(base_dir)
     txt_file = [i for i in files if i.endswith('.txt')][0]
     htmls_file = [i for i in files if i.endswith('.json')][0]
-    items = parse_txt_file(os.path.join(base_dir, txt_file))
+    is_broken = bool([i for i in files if i == 'broken'])
 
     with open(os.path.join(base_dir, htmls_file)) as f:
         htmls = json.load(f)['htmls']
 
-    list_items = []
+    raw_txt_items = parse_txt_file(os.path.join(base_dir, txt_file))
+    raw_list_items = []
     for html in htmls:
         for row in PyQuery(html).find('tr'):
             pq_row = PyQuery(row)
@@ -138,7 +139,7 @@ def read_spider_format(file_path):
                 list_author=list_author,
                 list_source=list_source,
                 list_date=list_date,
-                list_date_format=_parse_list_date(list_date),
+                list_date_format=list_date_format,
                 list_data=list_data,
                 list_quote=list_quote,
                 list_download=list_download,
@@ -146,7 +147,28 @@ def read_spider_format(file_path):
                 list_filename=list_filename,
                 list_id=list_id,
             )
-            list_items.append(list_item)
+            raw_list_items.append(list_item)
+
+    if is_broken:
+        items = []
+        list_items = []
+        for list_item in raw_list_items:
+            _match_name_items = [i for i in raw_txt_items if i['Title'] == list_item['list_name']]
+            if len(_match_name_items) == 1:
+                list_items.append(list_item)
+                items.append(_match_name_items[0])
+                continue
+
+            _txt_items = [i for i in raw_txt_items if i['PubTime'] == list_item['list_date_format']]
+            _list_items = [i for i in raw_list_items if i['list_date_format'] == list_item['list_date_format']]
+            if len(_txt_items) == 1 and len(_list_items) == 1 and _txt_items[0] not in items:
+                list_items.append(list_item)
+                items.append(_txt_items[0])
+
+        print(f'broken: raw_txt_items={len(raw_txt_items)} raw_list_items={len(raw_list_items)} items={len(items)}')
+    else:
+        items = raw_txt_items
+        list_items = raw_list_items
 
     if len(items) != len(list_items):
         print('len(items)', len(items))
