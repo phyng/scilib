@@ -44,30 +44,42 @@ def get_name_features(name):
     return features
 
 
-def load_featureset(names_file):
+@lru_cache(maxsize=None)
+def load_names_file(names_file):
     df_names = pd.read_csv(os.path.join(DATA_DIR, names_file))
     df_names = df_names.drop_duplicates(['name'])
-    print(f'{names_file} count={df_names.shape}')
+    # print(f'  {names_file} count={df_names.shape}')
 
-    featureset = []
+    items = []
     for i, row in df_names.iterrows():
         name = str(row['name']).strip()
         gender = str(row['gender']).strip()
         if gender not in ['男', '女']:
             continue
         gender = 'M' if gender == '男' else 'F'
+        if len(name) not in [2, 3, 4]:
+            continue
+        items.append(dict(name=name, gender=gender))
+    return items
+
+
+def load_featureset(names_file):
+    items = load_names_file(names_file)
+    featureset = []
+    for item in items:
+        name = item['name']
+        gender = item['gender']
         features = get_name_features(name)
         if not features:
             continue
         featureset.append((features, gender))
 
-    print(f'{names_file} featureset={len(featureset)}')
     random.shuffle(featureset)
-    featureset_m = [i for i in featureset if i[1] == 'M']
-    featureset_f = [i for i in featureset if i[1] == 'F']
-    print(f'{names_file} M={len(featureset_m)} F={len(featureset_f)}')
-    min_size = min(len(featureset_m), len(featureset_f))
-    return (featureset_m[:min_size] + featureset_f[:min_size])
+    # print(f'  {names_file} featureset={len(featureset)}')
+    # featureset_m = [i for i in featureset if i[1] == 'M']
+    # featureset_f = [i for i in featureset if i[1] == 'F']
+    # print(f'{names_file} M={len(featureset_m)} F={len(featureset_f)}')
+    return featureset
 
 
 class ChineseGenderPredictor(object):
@@ -93,8 +105,32 @@ class ChineseGenderPredictor(object):
     def predict(self, name):
         features = get_name_features(name)
         if not features:
-            return None, None
-        return self.classifier.prob_classify(features).prob('M'), self.classifier.prob_classify(features).prob('F')
+            return None
+        prob = self.classifier.prob_classify(features)
+        prob_m = prob.prob('M')
+        prob_f = prob.prob('F')
+        if prob_m > prob_f:
+            return 'M'
+        elif prob_m < prob_f:
+            return 'F'
+        else:
+            return 'O'
+
+    def test(self, items, name_map=None):
+        right_count = 0
+        error_count = 0
+        for item in items:
+            if item['name'] in name_map:
+                predict_value = name_map[item['name']]
+            else:
+                predict_value = self.predict(item['name'])
+            if predict_value is None:
+                continue
+            if predict_value == item['gender']:
+                right_count += 1
+            else:
+                error_count += 1
+        return right_count / (right_count + error_count)
 
 
 def test_file(names_file):
@@ -104,31 +140,35 @@ def test_file(names_file):
     return accuracy
 
 
-def cross_test():
-    github_featureset = load_featureset('names_github.csv')
-    web_featureset = load_featureset('names_web.csv')
-    nsfc_featureset = load_featureset('names_nsfc.csv')
-    zero_featureset = load_featureset('names_zero.csv')
+def test_group():
+    for tran_group, test_group in [
+        ('github', 'github'),
+        ('github', 'nsfc'),
+        ('github', 'zero'),
+        ('github', 'web'),
 
-    for group, tran, test in [
-        ('github_web', github_featureset, web_featureset),
-        ('github_nsfc', github_featureset, nsfc_featureset),
-        ('github_zero', github_featureset, zero_featureset),
-        ('web_nsfc', web_featureset, nsfc_featureset),
-        ('web_github', web_featureset, github_featureset),
-        ('web_zero', web_featureset, zero_featureset),
-        ('zero_nsfc', zero_featureset, nsfc_featureset),
-        ('zero_github', zero_featureset, github_featureset),
-        ('zero_web', zero_featureset, web_featureset),
+        ('web', 'web'),
+        ('web', 'nsfc'),
+        ('web', 'github'),
+        ('web', 'zero'),
     ]:
-        predictor = ChineseGenderPredictor()
-        accuracy = predictor.train_and_test(train_set=tran, test_set=test)
-        print(f'group={group} accuracy={accuracy}')
+        tran_items = load_names_file(f'names_{tran_group}.csv')
+        tran_featureset = load_featureset(f'names_{tran_group}.csv')
+        test_items = load_names_file(f'names_{test_group}.csv')
+        test_featureset = load_featureset(f'names_{test_group}.csv')
+
+        if tran_group == test_group:
+            predictor = ChineseGenderPredictor()
+            accuracy_self = predictor.train_and_test(featureset=tran_featureset)
+            print(f'{tran_group}-{tran_group} accuracy_self={accuracy_self}')
+        else:
+            predictor = ChineseGenderPredictor()
+            accuracy = predictor.train_and_test(train_set=tran_featureset, test_set=test_featureset)
+            print(f'{tran_group}-{test_group} accuracy={accuracy}')
+
+            accuracy_with_map = predictor.test(test_items, {i['name']: i['gender'] for i in tran_items})
+            print(f'{tran_group}-{test_group} accuracy_with_map={accuracy_with_map}')
 
 
 if __name__ == '__main__':
-    cross_test()
-
-    for names_file in ['names_web.csv', 'names_github.csv']:
-        print(f'use_file={names_file}')
-        print('accuracy', test_file(names_file))
+    test_group()
