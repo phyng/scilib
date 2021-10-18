@@ -75,7 +75,7 @@ def load_featureset(names_file):
         featureset.append((features, gender))
 
     random.shuffle(featureset)
-    # print(f'  {names_file} featureset={len(featureset)}')
+    print(f'  {names_file} featureset={len(featureset)}')
     # featureset_m = [i for i in featureset if i[1] == 'M']
     # featureset_f = [i for i in featureset if i[1] == 'F']
     # print(f'{names_file} M={len(featureset_m)} F={len(featureset_f)}')
