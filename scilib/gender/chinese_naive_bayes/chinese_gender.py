@@ -102,9 +102,11 @@ class ChineseGenderPredictor(object):
     def get_most_informative_features(self, n=5):
         return self.classifier.most_informative_features(n)
 
-    def predict(self, name):
+    def predict(self, name, last_name_length=None):
         features = get_name_features(name)
         if not features:
+            return None
+        if last_name_length is not None and len(features['last_name']) != last_name_length:
             return None
         prob = self.classifier.prob_classify(features)
         prob_m = prob.prob('M')
@@ -116,20 +118,22 @@ class ChineseGenderPredictor(object):
         else:
             return 'O'
 
-    def test(self, items, name_map=None):
+    def test(self, items, name_map=None, last_name_length=None):
         right_count = 0
         error_count = 0
         for item in items:
-            if item['name'] in name_map:
+            if name_map and item['name'] in name_map:
                 predict_value = name_map[item['name']]
             else:
-                predict_value = self.predict(item['name'])
+                predict_value = self.predict(item['name'], last_name_length=last_name_length)
             if predict_value is None:
                 continue
             if predict_value == item['gender']:
                 right_count += 1
             else:
                 error_count += 1
+        if (right_count + error_count) == 0:
+            return 0
         return right_count / (right_count + error_count)
 
 
@@ -168,6 +172,12 @@ def test_group():
 
             accuracy_with_map = predictor.test(test_items, {i['name']: i['gender'] for i in tran_items})
             print(f'{tran_group}-{test_group} accuracy_with_map={accuracy_with_map}')
+
+            accuracy_with_last_name_length1 = predictor.test(test_items, last_name_length=1)
+            print(f'{tran_group}-{test_group} accuracy_with_last_name_length1={accuracy_with_last_name_length1}')
+
+            accuracy_with_last_name_length2 = predictor.test(test_items, last_name_length=2)
+            print(f'{tran_group}-{test_group} accuracy_with_last_name_length2={accuracy_with_last_name_length2}')
 
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@
 from __future__ import unicode_literals, absolute_import, print_function, division
 
 import os
+import redis
 import hashlib
 import asyncio
 import pandas as pd
@@ -15,6 +16,9 @@ from scilib.iterlib import chunks
 from scilib.wos.importer import read_text_format_dir_parallel, read_text_format_path
 from scilib.wos.parser import parse_version1, remove_row_type
 from scilib.db.es import index_or_update_rows
+
+ENV_REDIS_HOST = os.environ.get('ENV_REDIS_HOST') or '127.0.0.1'
+ENV_REDIS_PORT = os.environ.get('ENV_REDIS_PORT') or '6379'
 
 
 def es_callback(path, index):
@@ -75,6 +79,16 @@ def ut_query_callback(path, to_dir):
             print(len(uts), file_path)
 
 
+def doi_redis_callback(path, to_dir):
+    items = read_text_format_path(path)
+    dois = set([item['DI'] for item in items if item.get('DI', '')])
+    client = redis.StrictRedis(host=ENV_REDIS_HOST, port=ENV_REDIS_PORT)
+    for _dois in chunks(dois, size=500):
+        if _dois:
+            client.lpush(to_dir, *_dois)
+            print('dump', len(_dois))
+
+
 async def main(from_dir, to_type, to_dir, index, fields, export_type, tag, py_from, py_to):
     if to_type == 'es':
         await read_text_format_dir_parallel(from_dir, es_callback, index)
@@ -89,6 +103,8 @@ async def main(from_dir, to_type, to_dir, index, fields, export_type, tag, py_fr
         print(f'download_dois={len(download_dois)} cr_dois={len(cr_dois)} new_dois={len(new_dois)}')
     elif to_type == 'ut_query':
         await read_text_format_dir_parallel(from_dir, ut_query_callback, to_dir)
+    elif to_type == 'doi_redis':
+        await read_text_format_dir_parallel(from_dir, doi_redis_callback, to_dir)
     elif to_type.endswith('.fast5k.csv'):
         results = await read_text_format_dir_parallel(from_dir, fast5k_csv_callback)
         df = pd.DataFrame.from_records((i for li in results for i in li)).drop_duplicates('UT')
