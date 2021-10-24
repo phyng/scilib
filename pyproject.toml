@@ -19,13 +19,13 @@ scilib-db-trans = "scilib.scripts.db_trans:run"
 scilib-gender-benchmark = "scilib.gender.benchmark.benchmark:run"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.7,<3.10"
 pandas = "^1.0.3"
 jupyter = "^1.0.0"
 numpy = "^1.18.2"
 xlrd = "^1.2.0"
 matplotlib = "^3.2.1"
-scipy = "^1.4.1"
+scipy = "1.7.1"
 requests = {extras = ["socks"], version = "^2.26.0"}
 openpyxl = "^3.0.3"
 orjson = "^3.2.1"
