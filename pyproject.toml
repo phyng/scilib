@@ -25,7 +25,7 @@ jupyter = "^1.0.0"
 numpy = "^1.18.2"
 xlrd = "^1.2.0"
 matplotlib = "^3.2.1"
-scipy = "1.7.1"
+scipy = "^1.7.2"
 requests = {extras = ["socks"], version = "^2.26.0"}
 openpyxl = "^3.0.3"
 orjson = "^3.2.1"

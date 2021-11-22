@@ -88,6 +88,9 @@ class ChineseGenderPredictor(object):
         self.training_percent = 0.8
         self.classifier = None
 
+    def train(self, featureset):
+        self.classifier = NaiveBayesClassifier.train(featureset)
+
     def train_and_test(self, featureset=None, train_set=None, test_set=None):
         if not (train_set and test_set):
             random.shuffle(featureset)
@@ -95,7 +98,7 @@ class ChineseGenderPredictor(object):
             train_set = train_set or featureset[:break_point]
             test_set = test_set or featureset[break_point:]
 
-        self.classifier = NaiveBayesClassifier.train(train_set)
+        self.train(train_set)
         accuracy = classify.accuracy(self.classifier, test_set)
         return accuracy
 
