@@ -23,15 +23,18 @@ def es_callback(path):
         return
 
 
-async def main(from_dir, to, from_type, to_type):
+async def main(from_dir, to, from_type, to_type, fields):
+    fields = fields.split(',') if fields else []
+    df = None
+
     if from_type == 'text':
         items = read_text_format_dir(from_dir)
         df = pd.DataFrame.from_records(items)
-        df = df.drop_duplicates(subset=['Title'])
+        # df = df.drop_duplicates(subset=['Title'])
     elif from_type == 'spider':
-        items = read_spider_format_dir(from_dir)
+        items = read_spider_format_dir(from_dir, fields=fields)
         df = pd.DataFrame.from_records(items)
-        df = df.drop_duplicates(subset=['Title'])
+        # df = df.drop_duplicates(subset=['Title'])
     elif from_type == 'spider_parallel':
         if to_type == 'parallel_es':
             await read_spider_format_dir_parallel(from_dir, callback=es_callback)
@@ -48,7 +51,13 @@ async def main(from_dir, to, from_type, to_type):
         pd.DataFrame.from_records(corrs).to_excel(to + '.corrs.xlsx')
         pd.DataFrame.from_records(corrs).to_csv(to + '.corrs.csv')
     elif to_type == 'excel':
+        if fields:
+            df = df[fields]
         df.to_excel(to)
+    elif to_type == 'csv':
+        if fields:
+            df = df[fields]
+        df.to_csv(to)
     elif to_type == 'parallel_es':
         pass
     else:
@@ -61,9 +70,10 @@ def run():
     parser.add_option("--to", action="store", type="str", dest="to", default="count")
     parser.add_option("--from-type", action="store", type="str", dest="from_type", default="text")
     parser.add_option("--to-type", action="store", type="str", dest="to_type", default="corr")
+    parser.add_option("--fields", action="store", type="str", dest="fields", default="")
 
     options, args = parser.parse_args()
-    asyncio.run(main(options.from_dir, options.to, options.from_type, options.to_type))
+    asyncio.run(main(options.from_dir, options.to, options.from_type, options.to_type, options.fields))
 
 
 if __name__ == '__main__':
