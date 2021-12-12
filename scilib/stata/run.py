@@ -8,7 +8,7 @@ import subprocess
 from pathlib import Path
 
 from .base import call_batch
-from .plugin import start_with_cd, xls2dta, summary, reg, nbreg
+from .plugin import start_with_cd, xls2dta, summary, reg, nbreg, psm
 
 STATA_ENTRY = os.environ.get('STATA_ENTRY', '/Applications/Stata/StataSE.app/Contents/MacOS/StataSE')
 
@@ -28,6 +28,8 @@ def run(working_dir):
         elif action['type'] == 'nbreg':
             actions.append(reg(action["vars"]))
             actions.append(nbreg(f'{action["depVar"]} {action["vars"]}'))
+        elif action['type'] == 'psm':
+            actions.append(psm(action["treatVar"], action["vars"], action["depVar"]))
 
     do_content = call_batch(*actions)
     do_file = os.path.join(working_dir, 'run.do')
