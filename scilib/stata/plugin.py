@@ -57,3 +57,61 @@ def nbreg(var_list, word_file='mytable.docx'):
             title("表2: 线性回归模型") mtitles("模型") append
         """.replace('REPLACE_WORE_FILE', word_file)),
     )
+
+
+def psm(var_treat, var_deps, var_result):
+    def graph(suffix):
+        return [
+            call(f'* 均衡性检验 {suffix}'),
+            call('pstest $v2, both graph'),
+            call(f'graph export pstest_{suffix}.eps, replace'),
+
+            call(f'* 共同取值范围 {suffix}'),
+            call('psgraph'),
+            call(f'graph export psgraph_{suffix}.eps, replace'),
+        ]
+
+    return call_batch(
+        call('set seed 20211209'),
+        call('gen u=runiform()'),
+        call('sort u'),
+        call(f'local v1 "{var_treat}"'),
+        call(f'local v2 "{var_deps}"'),
+        call(""" global x "`v1' `v2'" """),
+
+        call('* 多元回归'),
+        call(f'reg {var_result} $x, r'),
+
+        call('* 1:1 匹配'),
+        call(f'psmatch2 $x, out({var_result}) neighbor(1) ate ties logit common'),
+        *graph('1_1'),
+
+        call('* 最近邻匹配，k=4'),
+        call(f'psmatch2 $x, out({var_result}) n(4) ate ties logit common'),
+        *graph('1_4'),
+
+        call('* 计算倾向得分'),
+        call('sum _pscore'),
+        call('dis 0.25 * r(sd)'),
+
+        call('* 半径匹配'),
+        call(f'psmatch2  $x, out({var_result}) n(4) cal(0.01) ate ties logit common'),
+        *graph('r'),
+
+        call('* 核匹配，使用默认的核函数和带宽'),
+        call(f'psmatch2 $x, out({var_result})  kernel ate ties logit common'),
+        *graph('k'),
+
+        call('* 核密度函数图'),
+        call(
+            'twoway(kdensity _ps if _treat==1,legend(label(1 "Treat")))(kdensity _ps '
+            'if _treat==0, legend(label(2 "Control"))),xtitle(Pscore) title("Before Matching")'
+        ),
+        call('graph export before.eps, replace'),
+
+        call(
+            'twoway(kdensity _ps if _treat==1,legend(label(1 "Treat")))(kdensity _ps '
+            'if (_weight!=1&_weight!=.), legend(label(2 "Control"))), xtitle(Pscore) title("After Matching")'
+        ),
+        call('graph export after.eps, replace'),
+    )
