@@ -39,6 +39,17 @@ def parse_fu_tokens(row):
     return []
 
 
+def parse_clc_tokens(row):
+    if row.get('CLC', '') and str(row['CLC']) != 'nan':
+        clc = row['CLC']
+        try:
+            clc = clc[:clc.index('ISSN')]
+        except ValueError:
+            pass
+        return [i.strip() for i in clc.split(';') if i.strip()]
+    return []
+
+
 def parse_txt_file(file_path):
     """ 解析自定义导出文件
     """
@@ -59,7 +70,7 @@ def parse_txt_file(file_path):
                 article[currentField] = article.get(currentField, '') + content
             else:
                 article[currentField] = article.get(currentField, '') + content
-        elif [i for i in FIELDS if line.startswith(i + '-')]:
+        elif [i for i in FIELDS if line.startswith(i + '-') and not line.startswith('Fund-ing')]:
             currentField = line.split('-')[0]
             content = line[(line.index(':') + 1):].strip()
             article = articles.setdefault(currentIndex, {})
@@ -88,7 +99,7 @@ def _parse_list_date(list_date):
         return None
 
 
-def read_spider_format(file_path):
+def read_spider_format(file_path, fields=None):
     print('file_path', file_path)
     base_dir = os.path.dirname(file_path)
     files = os.listdir(base_dir)
@@ -176,19 +187,26 @@ def read_spider_format(file_path):
         print('error: list items length error', '=' * 50)
         # raise ValueError('list items length error')
         yield from iter([])
+
     for item, list_item in zip(items, list_items):
         item.update(list_item)
 
     for item in items:
         if item.get('Fund'):
             item['fu_tokens'] = parse_fu_tokens(item)
+        if item.get('CLC'):
+            item['clc_tokens'] = parse_clc_tokens(item)
 
-    yield from iter(items)
+    if fields:
+        for item in items:
+            yield {field: item.get(field) for field in fields}
+    else:
+        yield from iter(items)
 
 
-def read_spider_format_dir(from_dir):
+def read_spider_format_dir(from_dir, fields=None):
     for file in Path(from_dir).glob('**/end'):
-        yield from read_spider_format(file)
+        yield from read_spider_format(file, fields=fields)
 
 
 async def read_spider_format_dir_parallel(from_dir, callback, *args):
