@@ -6,11 +6,22 @@ import os
 import json
 import subprocess
 from pathlib import Path
+import logging
 
 from .base import call_batch
 from .plugin import start_with_cd, xls2dta, summary, reg, nbreg, psm
 
+logging.basicConfig(
+    format='%(asctime)s,%(msecs)d %(levelname)s %(name)s [%(filename)s:%(lineno)d] %(message)s',
+    datefmt=r'%Y-%m-%d:%H:%M:%S',
+    level=logging.DEBUG,
+    filename=os.environ.get('LOG_FILE'),
+    filemode='a',
+)
+
 STATA_ENTRY = os.environ.get('STATA_ENTRY', '/Applications/Stata/StataSE.app/Contents/MacOS/StataSE')
+logger = logging.getLogger('stata')
+logger.addHandler(logging.StreamHandler())
 
 
 def run(working_dir):
@@ -43,9 +54,13 @@ def run(working_dir):
             '-e',
             'do',
             'run.do'
-        ], cwd=working_dir, timeout=3 * 60)
+        ], cwd=working_dir, timeout=5 * 60)
+        with open(os.path.join(working_dir, 'run.end'), 'w') as f:
+            f.write('success')
     except subprocess.TimeoutExpired:
-        print('subprocess.TimeoutExpired')
+        logger.error(f'执行超时 {working_dir} subprocess.TimeoutExpired')
+        with open(os.path.join(working_dir, 'run.end'), 'w') as f:
+            f.write('error')
 
 
 def run_all(entry_dir):
@@ -55,10 +70,10 @@ def run_all(entry_dir):
         working_dir = os.path.dirname(file)
         if not (os.path.isdir(working_dir)):
             continue
-        print(f'run with {working_dir}...')
-        run_log = os.path.join(working_dir, 'run.log')
+        logger.info(f'开始执行 {working_dir}...')
+        run_log = os.path.join(working_dir, 'run.end')
         if os.path.exists(run_log):
-            print(f'ignore {working_dir}')
+            logger.info(f'忽略 {working_dir}')
             continue
         run(working_dir)
 
