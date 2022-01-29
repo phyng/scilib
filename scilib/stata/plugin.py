@@ -45,7 +45,7 @@ def nbreg(var_list, word_file='mytable.docx'):
         call("""
             reg2docx m1 using REPLACE_WORE_FILE,         ///
             b(%5.3f) t(%5.3f) scalars(N p(%9.3f))   ///
-            title("表1: 负二项回归输出") mtitles("模型") append
+            title("表: 负二项回归输出") mtitles("模型") append
         """.replace('REPLACE_WORE_FILE', word_file)),
         call('reg', var_list),
         call('estat imtest, white'),
@@ -54,16 +54,19 @@ def nbreg(var_list, word_file='mytable.docx'):
         call("""
             reg2docx m2 using REPLACE_WORE_FILE,         ///
             b(%5.3f) se(%9.2f) scalars(N p(%9.3f))   ///
-            title("表2: 线性回归模型") mtitles("模型") append
+            title("表: 线性回归模型") mtitles("模型") append
         """.replace('REPLACE_WORE_FILE', word_file)),
     )
 
 
-def psm(var_treat, var_deps, var_result):
+def psm(var_treat, var_deps, var_result, word_file='mytable.docx'):
+
     def graph(suffix):
         return [
             call(f'* 均衡性检验 {suffix}'),
+            call(f'* PUT_TO_EXCEL_START:{suffix}_pstest'),
             call('pstest $v2, both graph'),
+            call(f'* PUT_TO_EXCEL_END:{suffix}_pstest'),
             call(f'graph export pstest_{suffix}.eps, replace'),
 
             call(f'* 共同取值范围 {suffix}'),
@@ -79,10 +82,20 @@ def psm(var_treat, var_deps, var_result):
         call(f'local v2 "{var_deps}"'),
         call(""" global x "`v1' `v2'" """),
 
+        call('* 一元回归'),
+        call(f'reg {var_result} {var_treat}, r'),
+        call('est store pm1'),
+
         call('* 多元回归'),
         call(f'reg {var_result} $x, r'),
+        call('est store pm2'),
+        call("""
+            reg2docx pm1 pm2 using REPLACE_WORE_FILE,         ///
+            b(%5.3f) se(%9.2f) scalars(N p(%9.3f))   ///
+            title("表: 一元回归/多元回归") mtitles("一元回归" "多元回归") append
+        """.replace('REPLACE_WORE_FILE', word_file)),
 
-        call('* 1:1 匹配'),
+        call('* 1:1 匹配，默认有放回'),
         call(f'psmatch2 $x, out({var_result}) neighbor(1) ate ties logit common'),
         *graph('1_1'),
 
