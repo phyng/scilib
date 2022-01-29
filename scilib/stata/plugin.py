@@ -64,7 +64,9 @@ def psm(var_treat, var_deps, var_result, word_file='mytable.docx'):
     def graph(suffix):
         return [
             call(f'* 均衡性检验 {suffix}'),
+            call(f'* PUT_TO_EXCEL_START:{suffix}_pstest'),
             call('pstest $v2, both graph'),
+            call(f'* PUT_TO_EXCEL_END:{suffix}_pstest'),
             call(f'graph export pstest_{suffix}.eps, replace'),
 
             call(f'* 共同取值范围 {suffix}'),
@@ -93,7 +95,7 @@ def psm(var_treat, var_deps, var_result, word_file='mytable.docx'):
             title("表: 一元回归/多元回归") mtitles("一元回归" "多元回归") append
         """.replace('REPLACE_WORE_FILE', word_file)),
 
-        call('* 1:1 匹配'),
+        call('* 1:1 匹配，默认有放回'),
         call(f'psmatch2 $x, out({var_result}) neighbor(1) ate ties logit common'),
         *graph('1_1'),
 
