@@ -8,9 +8,10 @@ import subprocess
 from pathlib import Path
 import logging
 
-from .base import call_batch
+from .base import call, call_batch
 from .plugin import start_with_cd, xls2dta, summary, reg, nbreg, psm
 from .put import put_to_excel
+from .data import use_data_config
 
 logging.basicConfig(
     format='%(asctime)s,%(msecs)d %(levelname)s %(name)s [%(filename)s:%(lineno)d] %(message)s',
@@ -30,10 +31,18 @@ def run(working_dir):
     """
     with open(os.path.join(working_dir, 'config.json')) as f:
         config = json.load(f)
+
     actions = [
         start_with_cd(working_dir),
-        xls2dta('use-data.xlsx', 'use-data.dta'),
     ]
+
+    if config.get('data'):
+        use_data_config(config['data'], working_dir)
+        actions.append(call('use "use-data.dta"'))
+
+    if os.path.exists(os.path.join(working_dir, 'use-data.xlsx')):
+        actions.append(xls2dta('use-data.xlsx', 'use-data.dta'))
+
     for action in config['actions']:
         if action['type'] == 'summary':
             actions.append(summary(action['vars']))
