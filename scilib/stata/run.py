@@ -71,7 +71,11 @@ def run(working_dir):
         run_log = os.path.join(working_dir, 'run.log')
         if os.path.exists(run_log):
             with open(run_log, 'r') as f:
-                put_to_excel(f.read(), os.path.join(working_dir, 'output.xlsx'))
+                put_to_excel(
+                    f.read(),
+                    os.path.join(working_dir, 'output.xlsx'),
+                    os.path.join(working_dir, 'psmatch_output.xlsx'),
+                )
 
     except subprocess.TimeoutExpired:
         logger.error(f'执行超时 {working_dir} subprocess.TimeoutExpired')
@@ -112,6 +116,15 @@ def run_summary(entry_dir):
 
         with open(os.path.join(working_dir, 'config.json')) as f:
             config = json.load(f)
+
+        run_log = os.path.join(working_dir, 'run.log')
+        if os.path.exists(run_log):
+            with open(run_log, 'r') as f:
+                put_to_excel(
+                    f.read(),
+                    os.path.join(working_dir, 'output.xlsx'),
+                    os.path.join(working_dir, 'psmatch_output.xlsx'),
+                )
 
         for action in config['actions']:
             if action['type'] == 'psm':
