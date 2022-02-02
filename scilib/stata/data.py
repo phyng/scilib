@@ -19,6 +19,9 @@ def use_data_config(data, working_dir):
         elif action['type'] == 'filter_by_contains':
             df = df[df[action['field']].str.contains(action['value'])]
             logger.info(f'use_data_config df: action={action["type"]} shape={df.shape}')
+        elif action['type'] == 'filter_by_value':
+            df = df[df[action['field']] == action['value']]
+            logger.info(f'use_data_config df: action={action["type"]} shape={df.shape}')
         elif action['type'] == 'rename':
             df = df.rename(columns={**{k: k for k in df.columns}, **action['columns_map']})
             logger.info(f'use_data_config df: action={action["type"]} shape={df.shape}')

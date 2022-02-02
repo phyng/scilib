@@ -49,6 +49,20 @@ def _lines_to_table(lines):
     return items
 
 
+def get_rows_summary(rows):
+    m_rows = [row for row in rows if row['0_0'] == 'M']
+    m_rows_bias_allow = [row for row in m_rows if abs(float(row['1_2'])) <= 10]
+    m_rows_bias_not_allow = [row for row in m_rows if abs(float(row['1_2'])) > 10]
+    m_rows_p_allow = [row for row in m_rows if abs(float(row['2_1'])) >= 0.01]
+    m_rows_p_not_allow = [row for row in m_rows if abs(float(row['1_2'])) < 0.01]
+    return dict(
+        bias_allow=len(m_rows_bias_allow),
+        p_allow=len(m_rows_p_allow),
+        bias_not_allow=len(m_rows_bias_not_allow),
+        p_not_allow=len(m_rows_p_not_allow),
+    )
+
+
 def put_to_excel(output_log, excel_path):
     lines = output_log.split('\n')
 
@@ -60,6 +74,7 @@ def put_to_excel(output_log, excel_path):
             if PUT_TO_EXCEL_START in line:
                 state = 'IN'
                 current_group = [t for t in line.split() if t.startswith(PUT_TO_EXCEL_START)][0]
+                current_group = current_group.replace(PUT_TO_EXCEL_START, '').replace(':', '')
             else:
                 continue
         elif state == 'IN':
@@ -71,8 +86,10 @@ def put_to_excel(output_log, excel_path):
 
     all_items = []
     for current_group, lines in groups.items():
-        all_items.append(dict(group=current_group.replace(PUT_TO_EXCEL_START, '')))
-        all_items.extend(_lines_to_table(lines))
+        rows = _lines_to_table(lines)
+        all_items.append(dict(group=current_group))
+        all_items.extend([{**row, 'group': current_group} for row in rows])
+        all_items.append({**get_rows_summary(rows), 'group': current_group})
         all_items.append({})
         all_items.append({})
 
