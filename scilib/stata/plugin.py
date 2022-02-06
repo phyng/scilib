@@ -31,31 +31,45 @@ def summary(var_list, row_list='变量名称 均值 标准差 最大值 方差 �
     )
 
 
-def reg(var_list):
+def label(name, field, values_map):
+    return call_batch(
+        call('label define', name, ' '.join([f'{k} "{v}"' for k, v in values_map.items()])),
+        call('label values', field, name),
+    )
+
+
+def reg(var_list, word_file='mytable.docx'):
     return call_batch(
         call('reg', var_list),
         call('estat vif'),
+        call('estat imtest, white'),
+        call('reg', var_list, ', vce(robust)'),
+        call('est store m1'),
+        call("""
+            reg2docx m1 using REPLACE_WORE_FILE,         ///
+            b(%5.3f) se(%9.2f) scalars(N p(%9.3f))   ///
+            title("表: 线性回归") mtitles("模型") append
+        """.replace('REPLACE_WORE_FILE', word_file)),
     )
 
 
 def nbreg(var_list, word_file='mytable.docx'):
     return call_batch(
         call('nbreg', var_list, ',r'),
-        call('est store m1'),
-        call("""
-            reg2docx m1 using REPLACE_WORE_FILE,         ///
-            b(%5.3f) t(%5.3f) scalars(N p(%9.3f))   ///
-            title("表: 负二项回归输出") mtitles("模型") append
-        """.replace('REPLACE_WORE_FILE', word_file)),
-        call('reg', var_list),
-        call('estat imtest, white'),
-        call('reg', var_list, ', vce(robust)'),
         call('est store m2'),
         call("""
             reg2docx m2 using REPLACE_WORE_FILE,         ///
-            b(%5.3f) se(%9.2f) scalars(N p(%9.3f))   ///
-            title("表: 线性回归模型") mtitles("模型") append
+            b(%5.3f) t(%5.3f) scalars(N p(%9.3f))   ///
+            title("表: 负二项回归") mtitles("模型") append
         """.replace('REPLACE_WORE_FILE', word_file)),
+    )
+
+
+def margins(var_list):
+    return call_batch(
+        call('margins', var_list),
+        call('marginsplot, noci'),
+        call('graph export marginsplot.eps, replace'),
     )
 
 

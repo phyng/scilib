@@ -10,7 +10,7 @@ import logging
 import pandas as pd
 
 from .base import call, call_batch
-from .plugin import start_with_cd, xls2dta, summary, reg, nbreg, psm
+from .plugin import start_with_cd, xls2dta, summary, reg, nbreg, psm, margins, label
 from .put import put_to_excel
 from .data import use_data_config
 
@@ -47,9 +47,15 @@ def run(working_dir):
     for action in config['actions']:
         if action['type'] == 'summary':
             actions.append(summary(action['vars']))
+        elif action['type'] == 'label':
+            actions.append(label(action['name'], action['field'], action['values_map']))
         elif action['type'] == 'nbreg':
-            actions.append(reg(action["vars"]))
+            actions.append(reg(f'{action["depVar"]} {action["vars"]}'))
             actions.append(nbreg(f'{action["depVar"]} {action["vars"]}'))
+        elif action['type'] == 'reg':
+            actions.append(reg(f'{action["depVar"]} {action["vars"]}'))
+        elif action['type'] == 'margins':
+            actions.append(margins(action["vars"]))
         elif action['type'] == 'psm':
             actions.append(psm(action["treatVar"], action["vars"], action["depVar"]))
 

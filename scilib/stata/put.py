@@ -75,7 +75,7 @@ def _get_pstest_rows_summary(rows):
     m_rows_bias_allow = [row for row in m_rows if abs(float(row['1_2'])) <= 10]
     m_rows_bias_not_allow = [row for row in m_rows if abs(float(row['1_2'])) > 10]
     m_rows_p_allow = [row for row in m_rows if abs(float(row['2_1'])) >= 0.01]
-    m_rows_p_not_allow = [row for row in m_rows if abs(float(row['1_2'])) < 0.01]
+    m_rows_p_not_allow = [row for row in m_rows if abs(float(row['2_1'])) < 0.01]
     return dict(
         bias_allow=len(m_rows_bias_allow),
         p_allow=len(m_rows_p_allow),
