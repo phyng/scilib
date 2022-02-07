@@ -65,11 +65,17 @@ def nbreg(var_list, word_file='mytable.docx'):
     )
 
 
-def margins(var_list):
+def margins(var_list, title=None, xtitle=None, ytitle=None):
     return call_batch(
         call('margins', var_list),
-        call('marginsplot, noci'),
+        call(
+            'marginsplot, noci',
+            f'title("{title}")' if title else '',
+            f'xtitle("{xtitle}")' if xtitle else '',
+            f'ytitle("{ytitle}")' if ytitle else '',
+        ),
         call('graph export marginsplot.eps, replace'),
+        call('graph export marginsplot.pdf, replace'),
     )
 
 
