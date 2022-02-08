@@ -69,7 +69,7 @@ def margins(var_list, title=None, xtitle=None, ytitle=None):
     return call_batch(
         call('margins', var_list),
         call(
-            'marginsplot, noci',
+            'marginsplot, noci graphregion(fcolor(white))',
             f'title("{title}")' if title else '',
             f'xtitle("{xtitle}")' if xtitle else '',
             f'ytitle("{ytitle}")' if ytitle else '',
