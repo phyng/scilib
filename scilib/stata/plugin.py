@@ -45,11 +45,11 @@ def reg(var_list, word_file='mytable.docx'):
         call('estat imtest, white'),
         call('reg', var_list, ', vce(robust)'),
         call('est store m1'),
-        call("""
-            reg2docx m1 using REPLACE_WORE_FILE,         ///
+        call(f"""
+            reg2docx m1 using {word_file},           ///
             b(%5.3f) se(%9.2f) scalars(N p(%9.3f))   ///
-            title("表: 线性回归") mtitles("模型") append
-        """.replace('REPLACE_WORE_FILE', word_file)),
+            title("表: 线性回归 (reg {var_list})") mtitles("模型") append
+        """),
     )
 
 
@@ -57,11 +57,11 @@ def nbreg(var_list, word_file='mytable.docx'):
     return call_batch(
         call('nbreg', var_list, ',r'),
         call('est store m2'),
-        call("""
-            reg2docx m2 using REPLACE_WORE_FILE,         ///
+        call(f"""
+            reg2docx m2 using {word_file},          ///
             b(%5.3f) t(%5.3f) scalars(N p(%9.3f))   ///
-            title("表: 负二项回归") mtitles("模型") append
-        """.replace('REPLACE_WORE_FILE', word_file)),
+            title("表: 负二项回归 (nbreg {var_list})") mtitles("模型") append
+        """),
     )
 
 
