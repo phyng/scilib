@@ -27,8 +27,6 @@ def use_data_config(data, working_dir):
                 df = df[df[action['field']] > action['value']]
             elif action['filter_type'] == '>=':
                 df = df[df[action['field']] >= action['value']]
-            elif action['filter_type'] == '>=':
-                df = df[df[action['field']] >= action['value']]
             elif action['filter_type'] == '<':
                 df = df[df[action['field']] < action['value']]
             elif action['filter_type'] == '<=':
@@ -49,6 +47,30 @@ def use_data_config(data, working_dir):
             logger.info(f'use_data_config df: action={action["type"]} shape={df.shape}')
         elif action['type'] == 'map_value':
             df[action['field']] = df[action['field']].replace(action['values_map'])
+        elif action['type'] == 'create_by_apply':
+
+            def _test(condition, value):
+                if condition[0] == '>':
+                    return value > condition[1]
+                elif condition[0] == '>=':
+                    return value >= condition[1]
+                elif condition[0] == '<':
+                    return value < condition[1]
+                elif condition[0] == '<=':
+                    return value <= condition[1]
+                elif condition[0] == '=':
+                    return value == condition[1]
+                else:
+                    return False
+
+            def _f(row):
+                value = row[action['field']]
+                for target, conditions in action['values_map'].items():
+                    if all(_test(condition, value) for condition in conditions):
+                        return target
+                return action.get('value_default', value)
+
+            df[action['new_field']] = df.apply(_f, axis=1)
 
     df.to_csv(os.path.join(working_dir, 'use-data.csv'), index=False)
     df.to_stata(os.path.join(working_dir, 'use-data.dta'), write_index=False)
