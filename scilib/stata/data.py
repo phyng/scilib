@@ -3,16 +3,15 @@
 from __future__ import unicode_literals, absolute_import, print_function, division
 
 import os
+import numpy as np
 import pandas as pd
 import logging
 
 logger = logging.getLogger('stata')
 
 
-def use_data_config(data, working_dir):
-    df = pd.read_csv(data['from'], low_memory=False)
-    logger.info(f'use_data_config df: start shape={df.shape}')
-    for action in data.get('actions', []):
+def use_data_actions(actions, working_dir, df):
+    for action in actions:
         if action['type'] == 'select':
             df = df[action['columns']]
             logger.info(f'use_data_config df: action={action["type"]} shape={df.shape}')
@@ -72,5 +71,34 @@ def use_data_config(data, working_dir):
 
             df[action['new_field']] = df.apply(_f, axis=1)
 
+        elif action['type'] == 'df.apply.column_percent':
+            _sum = df[action['field']].sum()
+            df[action['new_field']] = df[action['field']].apply(lambda x: x / _sum)
+
+        elif action['type'] == 'pd.pivot_table':
+            params = action['params']
+            _table = pd.pivot_table(
+                df[action['fields']],
+                values=params.get('values'),
+                index=params.get('index'),
+                columns=params.get('columns'),
+                aggfunc={
+                    'count': len,
+                    'sum': np.sum,
+                    'mean': np.mean,
+                }.get(params.get('aggfunc'), len),
+            )
+            if action.get("actions"):
+                _table = use_data_actions(action['actions'], working_dir, _table)
+            _table.to_csv(os.path.join(working_dir, action['output']))
+
+    return df
+
+
+def use_data_config(data, working_dir):
+    df = pd.read_csv(data['from'], low_memory=False)
+    logger.info(f'use_data_config df: start shape={df.shape}')
+
+    df = use_data_actions(data['actions'], working_dir, df)
     df.to_csv(os.path.join(working_dir, 'use-data.csv'), index=False)
-    df.to_stata(os.path.join(working_dir, 'use-data.dta'), write_index=False)
+    return df

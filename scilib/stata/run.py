@@ -41,8 +41,14 @@ def run(working_dir):
     ]
 
     if config.get('data'):
-        use_data_config(config['data'], working_dir)
-        actions.append(call('use "use-data.dta"'))
+        df = use_data_config(config['data'], working_dir)
+        if config.get('actions'):
+            df.to_stata(os.path.join(working_dir, 'use-data.dta'), write_index=False)
+            actions.append(call('use "use-data.dta"'))
+        else:
+            with open(os.path.join(working_dir, 'run.end'), 'w') as f:
+                f.write('success')
+            return
 
     if os.path.exists(os.path.join(working_dir, 'use-data.xlsx')):
         actions.append(xls2dta('use-data.xlsx', 'use-data.dta'))
@@ -84,19 +90,26 @@ def run_all(entry_dir):
         working_dir = os.path.dirname(file)
         if not (os.path.isdir(working_dir)):
             continue
-        # logger.info(f'开始执行 {working_dir}...')
         run_end = os.path.join(working_dir, 'run.end')
         if os.path.exists(run_end):
-            # logger.info(f'忽略 {working_dir}')
             continue
+
+        running = os.path.join(working_dir, 'running.txt')
+        if os.path.exists(running):
+            continue
+
         try:
+            with open(running, 'w') as f:
+                f.write('')
             logger.info(f'正在执行 {working_dir}...')
             run(working_dir)
         except Exception as e:
             logger.error(f'执行失败 {working_dir} {e}')
             with open(os.path.join(working_dir, 'run.end'), 'w') as f:
                 f.write(traceback.format_exc())
-            continue
+        finally:
+            if os.path.exists(running):
+                os.remove(running)
 
 
 def run_summary(entry_dir):
