@@ -91,7 +91,7 @@ def make_blance_analytics(nodes, edges):
 
 
 def from_excel(path):
-    df = pd.read_excel(path)
+    df = pd.read_excel(path, engine='openpyxl')
     return [dict({k: v for k, v in row.items() if str(v) != 'nan'}) for i, row in df.iterrows()]
 
 

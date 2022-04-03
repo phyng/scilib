@@ -14,7 +14,7 @@ DATA_DIR = os.path.join(BASE_DIR, 'data')
 
 @lru_cache(maxsize=None)
 def get_double_names():
-    df_double = pd.read_excel(os.path.join(DATA_DIR, 'double_names.xlsx'))
+    df_double = pd.read_excel(os.path.join(DATA_DIR, 'double_names.xlsx'), engine='openpyxl')
     double_names = set([row['name'] for i, row in df_double.iterrows()])
     return double_names
 
