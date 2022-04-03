@@ -40,10 +40,15 @@ def label(name, field, values_map):
 
 def reg(var_list, word_file='mytable.docx'):
     return call_batch(
+        call('* 多元回归分析'),
         call('reg', var_list),
         call('estat vif'),
         call('estat imtest, white'),
+
+        call('* 多元回归分析(robust)'),
         call('reg', var_list, ', vce(robust)'),
+        call('estat vif'),
+        call('estat imtest, white'),
         call('est store m1'),
         call(f"""
             reg2docx m1 using {word_file},           ///
@@ -69,7 +74,7 @@ def margins(var_list, title=None, xtitle=None, ytitle=None):
     return call_batch(
         call('margins', var_list),
         call(
-            'marginsplot, noci graphregion(fcolor(white))',
+            'marginsplot, noci graphregion(fcolor(white)) plot1opts(lcolor(red) mcolor(red)) plot2opts(lcolor(blue) mcolor(blue))',  # noqa
             f'title("{title}")' if title else '',
             f'xtitle("{xtitle}")' if xtitle else '',
             f'ytitle("{ytitle}")' if ytitle else '',

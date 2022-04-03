@@ -10,13 +10,25 @@ import logging
 logger = logging.getLogger('stata')
 
 
-def use_data_actions(actions, working_dir, df):
+def use_data_actions(df, actions, working_dir=None):
     for action in actions:
         if action['type'] == 'select':
             df = df[action['columns']]
             logger.info(f'use_data_config df: action={action["type"]} shape={df.shape}')
         elif action['type'] == 'filter_by_contains':
             df = df[df[action['field']].str.contains(action['value'])]
+            logger.info(f'use_data_config df: action={action["type"]} shape={df.shape}')
+        elif action['type'] == 'extend_by_field':
+            _items = []
+            for _, row in df.iterrows():
+                value = row[action['field']]
+                extend_values = [i.strip() for i in str(value).split(',') if i.strip() and i.strip() != 'nan']
+                for v in extend_values:
+                    _items.append({
+                        **row,
+                        action['new_field']: v
+                    })
+            df = pd.DataFrame.from_records(_items)
             logger.info(f'use_data_config df: action={action["type"]} shape={df.shape}')
         elif action['type'] == 'filter_by_value':
             df = df[df[action['field']] == action['value']]
@@ -89,8 +101,10 @@ def use_data_actions(actions, working_dir, df):
                 }.get(params.get('aggfunc'), len),
             )
             if action.get("actions"):
-                _table = use_data_actions(action['actions'], working_dir, _table)
-            _table.to_csv(os.path.join(working_dir, action['output']))
+                _table = use_data_actions(_table, action['actions'], working_dir)
+            if working_dir:
+                _table.to_csv(os.path.join(working_dir, action['output']))
+            return _table
 
     return df
 
@@ -99,6 +113,6 @@ def use_data_config(data, working_dir):
     df = pd.read_csv(data['from'], low_memory=False)
     logger.info(f'use_data_config df: start shape={df.shape}')
 
-    df = use_data_actions(data['actions'], working_dir, df)
+    df = use_data_actions(df, data['actions'], working_dir)
     df.to_csv(os.path.join(working_dir, 'use-data.csv'), index=False)
     return df

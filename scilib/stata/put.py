@@ -144,7 +144,10 @@ def put_to_excel(output_log, excel_path, psmatch_output_path):
         rows = _pstest_lines_to_table(lines)
         all_items.append(dict(group=current_group))
         all_items.extend([{**row, 'group': current_group} for row in rows])
-        all_items.append({**_get_pstest_rows_summary(rows), 'group': current_group})
+        try:
+            all_items.append({**_get_pstest_rows_summary(rows), 'group': current_group})
+        except (ValueError, KeyError):
+            all_items.append(dict(group=current_group + ' summary error'))
         all_items.append({})
         all_items.append({})
 

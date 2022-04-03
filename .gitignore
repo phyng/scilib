@@ -64,5 +64,7 @@ scilib/doi/README_SECRET.md
 scilib/cnki/data/
 
 scilib/stata/*.do
+scilib/stata/word.py
+scilib/stata/batch.py
 
 notebook/
