@@ -10,6 +10,7 @@ import logging
 logger = logging.getLogger('stata')
 
 
+# flake8: noqa: C901
 def use_data_actions(df, actions, working_dir=None):
     for action in actions:
         if action['type'] == 'select':
