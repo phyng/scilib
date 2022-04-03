@@ -22,7 +22,7 @@ HMT_MAP = {
 
 @lru_cache(maxsize=None)
 def _get_std_country_list():
-    df_std_country = pd.read_excel(os.path.join(BASE_DIR, 'configs/std_country_map.xlsx'))
+    df_std_country = pd.read_excel(os.path.join(BASE_DIR, 'configs/std_country_map.xlsx'), engine='openpyxl')
     return [
         {'end': row['end'].lower().strip().replace('#', ' '), 'country': row['country'].lower().strip()}
         for i, row in df_std_country.iterrows()

@@ -10,7 +10,7 @@ from scilib.gender.gender_guesser_pypi.public import batch_classify
 
 
 def run(from_excel, to_excel):
-    df = pd.read_excel(from_excel)
+    df = pd.read_excel(from_excel, engine='openpyxl')
     items = []
     for index, row in df.iterrows():
         names = re.split(r'[ ,|]', str(row['Authors']))

@@ -20,7 +20,7 @@ SSH_CATEGORYS_SET = set([
 
 @lru_cache(maxsize=None)
 def _get_wc_ecoom_map_lower():
-    df_ecoom_category = pd.read_excel(os.path.join(BASE_DIR, 'configs/ecoom_category_20190806.xlsx'))
+    df_ecoom_category = pd.read_excel(os.path.join(BASE_DIR, 'configs/ecoom_category_20190806.xlsx'), engine='openpyxl')
     wc_ecoom_map = {row['WC']: row['ECOOM'] for i, row in df_ecoom_category.iterrows()}
     wc_ecoom_map_lower = {
         k.lower().strip(): v.lower().strip()
