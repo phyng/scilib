@@ -64,7 +64,7 @@ def nbreg(var_list, word_file='mytable.docx'):
         call('est store m2'),
         call(f"""
             reg2docx m2 using {word_file},          ///
-            b(%5.3f) t(%5.3f) scalars(N p(%9.3f))   ///
+            b(%5.3f) se(%9.2f) scalars(N p(%9.3f))   ///
             title("表: 负二项回归 (nbreg {var_list})") mtitles("模型") append
         """),
     )
@@ -119,6 +119,29 @@ def psm(var_treat, var_deps, var_result, word_file='mytable.docx'):
             b(%5.3f) se(%9.2f) scalars(N p(%9.3f))   ///
             title("表: 一元回归/多元回归") mtitles("一元回归" "多元回归") append
         """.replace('REPLACE_WORE_FILE', word_file)),
+
+        call('* logit 回归'),
+        call('logit $x'),
+        call("""
+            qui {
+                putdocx begin
+                putdocx paragraph, style(Heading2)
+                putdocx text ("PSM Logistic regression")
+                putdocx paragraph
+                putdocx text ("number of observations: `e(N)' ")
+                putdocx paragraph
+                putdocx text ("pseudo-R2: `e(r2_p)' ")
+                putdocx paragraph
+                putdocx text ("log likelihood: `e(ll)' ")
+                putdocx save mytable.docx, append
+            }
+        """),
+        call("""
+            est store psm_logit
+            reg2docx  psm_logit using mytable.docx,         ///
+                b(%5.3f) se(%9.2f) scalars(N p(%9.3f))      ///
+                title("表: PSM Logistic regression") mtitles("logit") append
+        """),
 
         call('* 1:1 匹配，默认有放回'),
         call(f'psmatch2 $x, out({var_result}) neighbor(1) ate ties logit common'),
