@@ -38,7 +38,7 @@ def label(name, field, values_map):
     )
 
 
-def reg(var_list, word_file='mytable.docx'):
+def reg(var_list, word_file='mytable.docx', test=''):
     return call_batch(
         call('* 多元回归分析'),
         call('reg', var_list),
@@ -47,6 +47,7 @@ def reg(var_list, word_file='mytable.docx'):
 
         call('* 多元回归分析(robust)'),
         call('reg', var_list, ', vce(robust)'),
+        call(f'test {test}' if test else ''),
         call('estat vif'),
         call('estat imtest, white'),
         call('est store m1'),
