@@ -1,11 +1,12 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, absolute_import, print_function, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import asyncio
-import pandas as pd
-from pathlib import Path
 import concurrent.futures
+from pathlib import Path
+
+import pandas as pd
 
 
 def _read_text_format_lines(lines):
@@ -33,6 +34,7 @@ def _read_text_format_lines(lines):
         elif len(start) == 2:
             if current_item is None:
                 print('[WARN] _read_text_format_lines', index, line)
+                continue
             current_item[start] = [end]
             current_item_key = start
         else:

@@ -1,12 +1,12 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import itertools
 
 
-def uniqify(sequence, key=None) -> iter:
-    """ uniqify
+def uniqify(sequence, key=None):
+    """uniqify
 
     Return uniqify sequence
     """
@@ -21,7 +21,7 @@ def uniqify(sequence, key=None) -> iter:
 
 
 def chunks(iterable, size=10):
-    """ chunks
+    """chunks
 
     Split list into multiple fixed size chunks
     """
@@ -33,7 +33,7 @@ def chunks(iterable, size=10):
 
 
 def isplit(lst, count=10):
-    """ isplit
+    """isplit
 
     Split list into n list
     """

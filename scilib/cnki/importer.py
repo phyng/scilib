@@ -105,7 +105,6 @@ def read_spider_format(file_path, fields=None):
     files = os.listdir(base_dir)
     txt_file = [i for i in files if i.endswith('.txt')][0]
     htmls_file = [i for i in files if i.endswith('.json')][0]
-    is_broken = bool([i for i in files if i == 'broken'])
 
     with open(os.path.join(base_dir, htmls_file)) as f:
         htmls = json.load(f)['htmls']
@@ -160,33 +159,64 @@ def read_spider_format(file_path, fields=None):
             )
             raw_list_items.append(list_item)
 
-    if is_broken:
-        items = []
-        list_items = []
-        for list_item in raw_list_items:
-            _match_name_items = [i for i in raw_txt_items if i['Title'] == list_item['list_name']]
-            if len(_match_name_items) == 1:
+    list_items = []
+    items = []
+
+    for list_item in raw_list_items:
+        # 名称完全匹配
+        _match_items = [i for i in raw_txt_items if i.get('Title', '') == list_item['list_name']]
+        if len(_match_items) == 1:
+            list_item['match_type'] = 'title'
+            list_items.append(list_item)
+            items.append(_match_items[0])
+            continue
+
+        # 中文名称完全匹配且机构完全匹配
+        _clean = lambda x: re.sub(r'[^\u4e00-\u9fa5]', '', x)
+        _clean_list_name = _clean(list_item['list_name'])
+        if len(_clean_list_name) > 5:
+            _match_items = [
+                i for i in raw_txt_items
+                if _clean_list_name == _clean(i.get('Title', '')) and list_item['list_source'] == i.get('Source')
+            ]
+            if len(_match_items) == 1:
+                list_item['match_type'] = 'title_cn'
                 list_items.append(list_item)
-                items.append(_match_name_items[0])
+                items.append(_match_items[0])
                 continue
 
-            _txt_items = [i for i in raw_txt_items if i['PubTime'] == list_item['list_date_format']]
-            _list_items = [i for i in raw_list_items if i['list_date_format'] == list_item['list_date_format']]
-            if len(_txt_items) == 1 and len(_list_items) == 1 and _txt_items[0] not in items:
+        # 英文名称完全匹配且机构完全匹配
+        _clean = lambda x: re.sub(r'[^a-zA-Z]', '', x).lower()
+        _clean_list_name = _clean(list_item['list_name'])
+        if len(_clean_list_name) > 10:
+            _match_items = [
+                i for i in raw_txt_items
+                if _clean_list_name == _clean(i.get('Title', '')) and list_item['list_source'] == i.get('Source')
+            ]
+            if len(_match_items) == 1:
+                list_item['match_type'] = 'title_en'
                 list_items.append(list_item)
-                items.append(_txt_items[0])
+                items.append(_match_items[0])
+                continue
 
-        print(f'broken: raw_txt_items={len(raw_txt_items)} raw_list_items={len(raw_list_items)} items={len(items)}')
-    else:
-        items = raw_txt_items
-        list_items = raw_list_items
+        # 使用期刊和发表日期
+        if list_item['list_source'] and list_item['list_date_format']:
+            list_token = str(list_item['list_source']) + ':' + str(list_item['list_date_format'])
+            get_item_token = lambda x: str(x.get('Source')) + ':' + str(x.get('PubTime'))[:10]
+            _match_items = [
+                i for i in raw_txt_items
+                if get_item_token(i) == list_token
+            ]
+            if len(_match_items) == 1:
+                list_item['match_type'] = 'source_date'
+                list_items.append(list_item)
+                items.append(_match_items[0])
+                continue
 
-    if len(items) != len(list_items):
-        print('len(items)', len(items))
-        print('len(list_items)', len(list_items))
-        print('error: list items length error', '=' * 50)
-        # raise ValueError('list items length error')
-        yield from iter([])
+        print('no match', list_item['list_name'])
+        list_item['match_type'] = 'no'
+        list_items.append(list_item)
+        items.append({})
 
     for item, list_item in zip(items, list_items):
         item.update(list_item)
