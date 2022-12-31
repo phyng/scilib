@@ -2330,7 +2330,7 @@ gender = ["agefromname", "gender-guesser", "genderizer"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "bc99085ccac9ec23817eac285fa6f6e6fe3678da142e5e2fba0a18cddba4096c"
+content-hash = "9d3ee14f268200b4889199c9a97b8427a0aa57d5b90ce15fe3eb1d4e722ab02d"
 
 [metadata.files]
 agefromname = [
