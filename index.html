@@ -1,66 +1,34 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Welcome to scilib’s documentation! &mdash; scilib 0.0.14 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-
-  
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="#" class="icon icon-home"> scilib
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -68,128 +36,89 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <!-- Local TOC -->
               <div class="local-toc"><ul>
 <li><a class="reference internal" href="#">Welcome to scilib’s documentation!</a></li>
-<li><a class="reference internal" href="#module-scilib.iterlib">scilib</a></li>
-<li><a class="reference internal" href="#module-scilib.iolib.file">iolib</a></li>
+<li><a class="reference internal" href="#module-scilib.iterlib">scilib</a><ul>
+<li><a class="reference internal" href="#scilib.iterlib.chunks"><code class="docutils literal notranslate"><span class="pre">chunks()</span></code></a></li>
+<li><a class="reference internal" href="#scilib.iterlib.isplit"><code class="docutils literal notranslate"><span class="pre">isplit()</span></code></a></li>
+<li><a class="reference internal" href="#scilib.iterlib.uniqify"><code class="docutils literal notranslate"><span class="pre">uniqify()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-scilib.iolib.file">iolib</a><ul>
+<li><a class="reference internal" href="#scilib.iolib.file.mkdirp"><code class="docutils literal notranslate"><span class="pre">mkdirp()</span></code></a></li>
+<li><a class="reference internal" href="#scilib.iolib.file.write_file"><code class="docutils literal notranslate"><span class="pre">write_file()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </div>
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="#">scilib</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="#">Docs</a> &raquo;</li>
-        
-      <li>Welcome to scilib’s documentation!</li>
-    
-    
+      <li><a href="#" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Welcome to scilib’s documentation!</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="welcome-to-scilib-s-documentation">
-<h1>Welcome to scilib’s documentation!<a class="headerlink" href="#welcome-to-scilib-s-documentation" title="Permalink to this headline">¶</a></h1>
+<h1>Welcome to scilib’s documentation!<a class="headerlink" href="#welcome-to-scilib-s-documentation" title="Permalink to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
 </section>
 <section id="module-scilib.iterlib">
-<span id="scilib"></span><h1>scilib<a class="headerlink" href="#module-scilib.iterlib" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="scilib.iterlib.chunks">
-<code class="sig-prename descclassname">scilib.iterlib.</code><code class="sig-name descname">chunks</code><span class="sig-paren">(</span><em class="sig-param">iterable</em>, <em class="sig-param">size=10</em><span class="sig-paren">)</span><a class="headerlink" href="#scilib.iterlib.chunks" title="Permalink to this definition">¶</a></dt>
+<span id="scilib"></span><h1>scilib<a class="headerlink" href="#module-scilib.iterlib" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="scilib.iterlib.chunks">
+<span class="sig-prename descclassname"><span class="pre">scilib.iterlib.</span></span><span class="sig-name descname"><span class="pre">chunks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scilib.iterlib.chunks" title="Permalink to this definition"></a></dt>
 <dd><p>Split list into multiple fixed size chunks</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="scilib.iterlib.isplit">
-<code class="sig-prename descclassname">scilib.iterlib.</code><code class="sig-name descname">isplit</code><span class="sig-paren">(</span><em class="sig-param">lst</em>, <em class="sig-param">count=10</em><span class="sig-paren">)</span><a class="headerlink" href="#scilib.iterlib.isplit" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="scilib.iterlib.isplit">
+<span class="sig-prename descclassname"><span class="pre">scilib.iterlib.</span></span><span class="sig-name descname"><span class="pre">isplit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scilib.iterlib.isplit" title="Permalink to this definition"></a></dt>
 <dd><p>Split list into n list</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="scilib.iterlib.uniqify">
-<code class="sig-prename descclassname">scilib.iterlib.</code><code class="sig-name descname">uniqify</code><span class="sig-paren">(</span><em class="sig-param">sequence</em>, <em class="sig-param">key=None</em><span class="sig-paren">)</span> &#x2192; iter<a class="headerlink" href="#scilib.iterlib.uniqify" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="scilib.iterlib.uniqify">
+<span class="sig-prename descclassname"><span class="pre">scilib.iterlib.</span></span><span class="sig-name descname"><span class="pre">uniqify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scilib.iterlib.uniqify" title="Permalink to this definition"></a></dt>
 <dd><p>Return uniqify sequence</p>
 </dd></dl>
 
 </section>
 <section id="module-scilib.iolib.file">
-<span id="iolib"></span><h1>iolib<a class="headerlink" href="#module-scilib.iolib.file" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="scilib.iolib.file.mkdirp">
-<code class="sig-prename descclassname">scilib.iolib.file.</code><code class="sig-name descname">mkdirp</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#scilib.iolib.file.mkdirp" title="Permalink to this definition">¶</a></dt>
+<span id="iolib"></span><h1>iolib<a class="headerlink" href="#module-scilib.iolib.file" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="scilib.iolib.file.mkdirp">
+<span class="sig-prename descclassname"><span class="pre">scilib.iolib.file.</span></span><span class="sig-name descname"><span class="pre">mkdirp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scilib.iolib.file.mkdirp" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="scilib.iolib.file.write_file">
-<code class="sig-prename descclassname">scilib.iolib.file.</code><code class="sig-name descname">write_file</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">content</em><span class="sig-paren">)</span><a class="headerlink" href="#scilib.iolib.file.write_file" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="scilib.iolib.file.write_file">
+<span class="sig-prename descclassname"><span class="pre">scilib.iolib.file.</span></span><span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scilib.iolib.file.write_file" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
@@ -199,42 +128,30 @@
 
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2020, phyng
-
-    </p>
+    <p>&#169; Copyright 2020, phyng.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
