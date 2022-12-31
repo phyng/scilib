@@ -1,9 +1,9 @@
 # coding: utf-8
 
-import os
 import json
-import uuid
+import os
 import shutil
+import uuid
 import zipfile
 
 TEMP_PATH = '/tmp'

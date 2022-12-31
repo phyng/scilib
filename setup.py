@@ -13,10 +13,10 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/phyng/scilib",
     packages=setuptools.find_packages(),
-    classifiers=(
+    classifiers=[
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
-    ),
-    setup_requires=['wheel'],
+    ],
+    setup_requires=["wheel"],
 )

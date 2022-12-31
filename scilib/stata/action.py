@@ -16,7 +16,7 @@ def use_actions(actions, config_actions):
             actions.append(reg(f'{action["depVar"]} {action["vars"]}'))
             actions.append(nbreg(f'{action["depVar"]} {action["vars"]}'))
         elif action['type'] == 'reg':
-            actions.append(reg(f'{action["depVar"]} {action["vars"]}'))
+            actions.append(reg(f'{action["depVar"]} {action["vars"]}', test=action.get("test", '')))
         elif action['type'] == 'margins':
             actions.append(margins(action["vars"], title=action.get('title'), xtitle=action.get('xtitle'), ytitle=action.get('ytitle')))  # noqa
         elif action['type'] == 'psm':
