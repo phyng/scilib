@@ -44,12 +44,9 @@ async def main(from_dir, to, from_type, to_type, fields):
     if to_type == 'corr':
         print('df.shape', df.shape)
         df.to_excel(to)
-        counter, counter_map, years_items_flat, corrs = collect_keywords([dict(i) for index, i in df.iterrows()])
-        counter_items = [dict(k=k, v=v) for k, v in counter.most_common()]
+        result = collect_keywords([dict(i) for index, i in df.iterrows()])
+        counter_items = [dict(k=k, v=v) for k, v in result['counter'].most_common()]
         pd.DataFrame.from_records(counter_items).to_excel(to + '.counter.xlsx')
-        pd.DataFrame.from_records(years_items_flat).to_excel(to + '.years_items_flat.xlsx')
-        pd.DataFrame.from_records(corrs).to_excel(to + '.corrs.xlsx')
-        pd.DataFrame.from_records(corrs).to_csv(to + '.corrs.csv')
     elif to_type == 'excel':
         if fields:
             df = df[fields]

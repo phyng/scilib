@@ -1,17 +1,18 @@
 # coding: utf-8
 
-from __future__ import unicode_literals, absolute_import, print_function, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
-import re
-import json
 import asyncio
 import datetime
-import concurrent
-from pathlib import Path
+import json
+import os
+import re
 from collections import Counter
-from pyquery import PyQuery
+from concurrent.futures import ProcessPoolExecutor
+from pathlib import Path
+
 from libs.iterlib import uniqify
+from pyquery import PyQuery
 
 FIELDS = [
     'SrcDatabase',
@@ -114,18 +115,18 @@ def read_spider_format(file_path, fields=None):
     for html in htmls:
         for row in PyQuery(html).find('tr'):
             pq_row = PyQuery(row)
-            list_name = pq_row.find('.name a').text().strip()
+            list_name = str(pq_row.find('.name a').text()).strip()
             if not list_name:
                 continue
-            list_marktip = pq_row.find('.name .marktip').text().strip()
-            list_author = pq_row.find('.author').text().strip()
-            list_source = pq_row.find('.source').text().strip()
-            list_date = pq_row.find('.date').text().strip()
-            list_data = pq_row.find('.data').text().strip()
+            list_marktip = str(pq_row.find('.name .marktip').text()).strip()
+            list_author = str(pq_row.find('.author').text()).strip()
+            list_source = str(pq_row.find('.source').text()).strip()
+            list_date = str(pq_row.find('.date').text()).strip()
+            list_data = str(pq_row.find('.data').text()).strip()
 
             try:
-                list_quote = int(pq_row.find('.quote').text().strip() or 0)
-                list_download = int(pq_row.find('.download').text().strip() or 0)
+                list_quote = int(str(pq_row.find('.quote').text()).strip() or 0)
+                list_download = int(str(pq_row.find('.download').text()).strip() or 0)
             except (ValueError, TypeError):
                 continue
             # print(
@@ -244,58 +245,63 @@ async def read_spider_format_dir_parallel(from_dir, callback, *args):
     """
     loop = asyncio.get_running_loop()
     futures = []
-    with concurrent.futures.ProcessPoolExecutor() as pool:
+    with ProcessPoolExecutor() as pool:
         for file_path in Path(from_dir).glob('**/end'):
             future = loop.run_in_executor(pool, callback, file_path, *args)
             futures.append(future)
     return await asyncio.gather(*futures, return_exceptions=False)
 
 
-def collect_keywords(items, keyword_field='Keyword', year_field='Year', keyword_replace_map=None, top_size=50):
-    """ 搜集关键词
+def collect_keywords(
+    items,
+    *,
+    keyword_field='Keyword',
+    year_field='Year',
+    keyword_replace_map=None,
+    keyword_func=None,
+    top_size=50
+):
+    """ 收集关键词
     """
+    def _keyword_func(item):
+        keyword = item.get(keyword_field, '') or ''
+        if str(keyword) == 'nan':
+            return []
+        tokens = re.split(r'[,;，]', keyword)
+        tokens = list(set([(keyword_replace_map or {}).get(i.strip(), i.strip()) for i in tokens if i and i.strip()]))
+        return tokens
 
-    keyword_replace_map = keyword_replace_map or {}
+    keyword_func = keyword_func or _keyword_func
     keywords = []
-    keywords_map = {}
+    year_keywords = {}
     tokens_list = []
     for item in items:
-        keyword = item.get(keyword_field, '') or ''
-        year = item.get(year_field, '') or ''
-        if str(keyword) == 'nan' or str(year) == 'nan' or len(str(int(year))) != 4:
+        tokens = keyword_func(item)
+        if tokens is None:
             continue
-        tokens = re.split(r'[,;，]', keyword)
-        tokens = list(set([keyword_replace_map.get(i.strip(), i.strip()) for i in tokens if i and i.strip()]))
-        keywords.extend(tokens)
-        keywords_map.setdefault(year, []).extend(tokens)
-        tokens_list.append((year, tokens))
-    counter = Counter(keywords)
-    counter_map = {k: Counter(v) for k, v in keywords_map.items()}
 
+        year = item.get(year_field, '') or ''
+        if str(year) == 'nan' or len(str(int(year))) != 4:
+            continue
+
+        keywords.extend(tokens)
+        year_keywords.setdefault(year, []).extend(tokens)
+        tokens_list.append(tokens)
+
+    counter = Counter(keywords)
+    year_counters = {year: Counter(tokens) for year, tokens in year_keywords.items()}
     top_n = [k for k, v in counter.most_common(top_size)]
-    print(top_n)
-    years_items = []
-    years_items_flat = []
-    for year, year_keywords in keywords_map.items():
-        years_items_flat.extend([dict(year=year, keyword=k) for k in year_keywords if k in top_n])
-        for keyword in top_n:
-            if keyword in year_keywords:
-                years_items.append([f'{int(year)}', year_keywords.count(keyword), keyword])
-    print(years_items)
 
     corrs = []
     for keyword1 in top_n:
-        print(keyword1 + ',', end='')
-        for index, keyword2 in enumerate(top_n):
-            count = len([True for year, tokens in tokens_list if keyword1 in tokens and keyword2 in tokens])
-            corrs.extend([
-                dict(year=year, keyword1=keyword1, keyword2=keyword2)
-                for year, tokens in tokens_list if keyword1 in tokens and keyword2 in tokens
-            ])
-            if (index + 1) == top_size:
-                print(str(count), end='')
-            else:
-                print(str(count) + ',', end='')
-        print('')
+        line = [keyword1]
+        for keyword2 in top_n:
+            count = len([True for tokens in tokens_list if keyword1 in tokens and keyword2 in tokens])
+            line.append(count)
+        corrs.append(line)
 
-    return counter, counter_map, years_items_flat, corrs
+    return dict(
+        counter=counter,
+        year_counters=year_counters,
+        corrs=corrs
+    )
