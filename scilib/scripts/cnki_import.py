@@ -8,7 +8,8 @@ from __future__ import unicode_literals, absolute_import, print_function, divisi
 import asyncio
 import pandas as pd
 from optparse import OptionParser
-from scilib.cnki.importer import read_text_format_dir, read_spider_format_dir, collect_keywords
+from scilib.cnki.importer import read_text_format_dir, read_spider_format_dir
+from scilib.cnki.keywords import collect_keywords
 from scilib.cnki.importer import read_spider_format, read_spider_format_dir_parallel
 from scilib.db.es import index_or_update_rows
 

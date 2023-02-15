@@ -62,6 +62,7 @@ scilib/gender/gender_computer/genderComputer/
 scilib/doi/README_SECRET.md
 
 scilib/cnki/data/
+scilib/cnki/config/
 
 scilib/stata/*.do
 scilib/stata/word.py

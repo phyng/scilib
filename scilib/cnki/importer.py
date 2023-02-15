@@ -7,12 +7,15 @@ import datetime
 import json
 import os
 import re
-from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+import pandas as pd
 
 from libs.iterlib import uniqify
 from pyquery import PyQuery
+
+CLC_MAP_PATH = Path(__file__).parent / 'config/clc_map.csv'
+CLC_MAP_DATA = {}
 
 FIELDS = [
     'SrcDatabase',
@@ -33,6 +36,15 @@ FIELDS = [
 ]
 
 
+def get_clc_map():
+    global CLC_MAP_DATA
+    if not CLC_MAP_DATA:
+        for _, row in pd.read_csv(CLC_MAP_PATH, encoding='utf-8').iterrows():
+            if row['key'] and str(row['key']) != 'nan' and row['value'] and str(row['value']) != 'nan':
+                CLC_MAP_DATA[row['key'].strip()] = row['value'].strip()
+    return CLC_MAP_DATA
+
+
 def parse_fu_tokens(row):
     if row.get('Fund', '') and str(row['Fund']) != 'nan':
         tokens = [re.sub(r'[^a-zA-Z0-9]', '', i) for i in re.split(r'[^a-zA-Z0-9]', row['Fund'])]
@@ -49,6 +61,72 @@ def parse_clc_tokens(row):
             pass
         return [i.strip() for i in clc.split(';') if i.strip()]
     return []
+
+
+def parse_clc_level1_tokens(item):
+    clc_map = get_clc_map()
+    tokens = []
+    for token in item['clc_tokens']:
+        if not token:
+            continue
+        elif token in ['+']:
+            continue
+        elif token[:1] in clc_map:
+            tokens.append(token[:1])
+        else:
+            pass
+    return list(uniqify(tokens))
+
+
+def parse_clc_level2_tokens(item):
+    clc_map = get_clc_map()
+    tokens = []
+    for token in item['clc_tokens']:
+        if not token:
+            continue
+        elif token in ['+']:
+            continue
+        elif token[:2] in clc_map:
+            tokens.append(token[:2])
+        elif token[:3] in clc_map:
+            tokens.append(token[:3])
+        else:
+            pass  # tokens.append(token)
+    return list(uniqify(tokens))
+
+
+def parse_keyword_tokens(item, keyword_field='Keyword', keyword_replace_map=None):
+    keyword = item.get(keyword_field, '') or ''
+    if str(keyword) == 'nan':
+        return []
+    tokens = re.split(r'[,;，]', keyword)
+    tokens = [(keyword_replace_map or {}).get(i.strip(), i.strip()) for i in tokens if i and i.strip()]
+    tokens = list(uniqify(tokens))
+    return tokens
+
+
+def parse_year(item, year_field='Year'):
+    year = item.get(year_field, '') or ''
+    if not year or str(year) == 'nan':
+        return None
+    try:
+        if len(str(int(year))) == 4:
+            return int(year)
+    except (ValueError, TypeError):
+        pass
+    return None
+
+
+def parse_list_date(list_date):
+    try:
+        list_date = list_date.split()[0]
+        tokens = list_date.split('-')
+        y = int(tokens[0])
+        m = int(tokens[1])
+        d = int(tokens[2])
+        return datetime.date(y, m, d).strftime(r'%Y-%m-%d')
+    except Exception:
+        return None
 
 
 def parse_txt_file(file_path):
@@ -88,19 +166,7 @@ def read_text_format_dir(from_dir):
         yield from parse_txt_file(file)
 
 
-def _parse_list_date(list_date):
-    try:
-        list_date = list_date.split()[0]
-        tokens = list_date.split('-')
-        y = int(tokens[0])
-        m = int(tokens[1])
-        d = int(tokens[2])
-        return datetime.date(y, m, d).strftime(r'%Y-%m-%d')
-    except Exception:
-        return None
-
-
-def read_spider_format(file_path, fields=None):
+def read_spider_format(file_path, *, fields=None, keyword_replace_map=None):
     print('file_path', file_path)
     base_dir = os.path.dirname(file_path)
     files = os.listdir(base_dir)
@@ -140,9 +206,9 @@ def read_spider_format(file_path, fields=None):
             list_filename = icon_collect.attrib['data-filename']
             list_id = f'dbname={list_dbname}&filename={list_filename}'
 
-            list_date_format = _parse_list_date(list_date)
-            if not list_date_format:
-                print('list_date_format error:', list_date, list_date_format)
+            list_date_format = parse_list_date(list_date)
+            # if not list_date_format:
+            #     print('list_date_format error:', list_date, list_date_format)
 
             list_item = dict(
                 list_name=list_name,
@@ -214,7 +280,7 @@ def read_spider_format(file_path, fields=None):
                 items.append(_match_items[0])
                 continue
 
-        print('no match', list_item['list_name'])
+        # print('no match', list_item['list_name'])
         list_item['match_type'] = 'no'
         list_items.append(list_item)
         items.append({})
@@ -223,10 +289,12 @@ def read_spider_format(file_path, fields=None):
         item.update(list_item)
 
     for item in items:
-        if item.get('Fund'):
-            item['fu_tokens'] = parse_fu_tokens(item)
-        if item.get('CLC'):
-            item['clc_tokens'] = parse_clc_tokens(item)
+        item['fu_tokens'] = parse_fu_tokens(item)
+        item['keyword_tokens'] = parse_keyword_tokens(item, keyword_replace_map=keyword_replace_map)
+        item['parsed_year'] = parse_year(item)
+        item['clc_tokens'] = parse_clc_tokens(item)
+        item['clc_level1_tokens'] = parse_clc_level1_tokens(item)
+        item['clc_level2_tokens'] = parse_clc_level2_tokens(item)
 
     if fields:
         for item in items:
@@ -235,9 +303,9 @@ def read_spider_format(file_path, fields=None):
         yield from iter(items)
 
 
-def read_spider_format_dir(from_dir, fields=None):
+def read_spider_format_dir(from_dir, fields=None, *, keyword_replace_map=None):
     for file in Path(from_dir).glob('**/end'):
-        yield from read_spider_format(file, fields=fields)
+        yield from read_spider_format(file, fields=fields, keyword_replace_map=keyword_replace_map)
 
 
 async def read_spider_format_dir_parallel(from_dir, callback, *args):
@@ -250,58 +318,3 @@ async def read_spider_format_dir_parallel(from_dir, callback, *args):
             future = loop.run_in_executor(pool, callback, file_path, *args)
             futures.append(future)
     return await asyncio.gather(*futures, return_exceptions=False)
-
-
-def collect_keywords(
-    items,
-    *,
-    keyword_field='Keyword',
-    year_field='Year',
-    keyword_replace_map=None,
-    keyword_func=None,
-    top_size=50
-):
-    """ 收集关键词
-    """
-    def _keyword_func(item):
-        keyword = item.get(keyword_field, '') or ''
-        if str(keyword) == 'nan':
-            return []
-        tokens = re.split(r'[,;，]', keyword)
-        tokens = list(set([(keyword_replace_map or {}).get(i.strip(), i.strip()) for i in tokens if i and i.strip()]))
-        return tokens
-
-    keyword_func = keyword_func or _keyword_func
-    keywords = []
-    year_keywords = {}
-    tokens_list = []
-    for item in items:
-        tokens = keyword_func(item)
-        if tokens is None:
-            continue
-
-        year = item.get(year_field, '') or ''
-        if str(year) == 'nan' or len(str(int(year))) != 4:
-            continue
-
-        keywords.extend(tokens)
-        year_keywords.setdefault(year, []).extend(tokens)
-        tokens_list.append(tokens)
-
-    counter = Counter(keywords)
-    year_counters = {year: Counter(tokens) for year, tokens in year_keywords.items()}
-    top_n = [k for k, v in counter.most_common(top_size)]
-
-    corrs = []
-    for keyword1 in top_n:
-        line = [keyword1]
-        for keyword2 in top_n:
-            count = len([True for tokens in tokens_list if keyword1 in tokens and keyword2 in tokens])
-            line.append(count)
-        corrs.append(line)
-
-    return dict(
-        counter=counter,
-        year_counters=year_counters,
-        corrs=corrs
-    )
