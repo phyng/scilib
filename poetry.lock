@@ -2727,6 +2727,7 @@ files = [
 numpy = [
     {version = ">=1.20.3", markers = "python_version < \"3.10\""},
     {version = ">=1.21.0", markers = "python_version >= \"3.10\""},
+    {version = ">=1.23.2", markers = "python_version >= \"3.11\""},
 ]
 python-dateutil = ">=2.8.1"
 pytz = ">=2020.1"
@@ -4786,5 +4787,5 @@ gender = ["agefromname", "gender-guesser", "genderizer"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.9,<=3.10"
-content-hash = "996193829ebc9f8c5209b3ea1249f38ff6118c8a3f6a09f982b98de954e1617e"
+python-versions = ">=3.9,<3.12"
+content-hash = "c9ca97f68b3d4ac9f8fcd9da39d2dbc0a8ca6a206b14573fc54c6ed1740d217a"
