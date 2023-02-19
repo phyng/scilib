@@ -6,7 +6,7 @@ from libs.iterlib import uniqify
 
 
 def parse_is_article(row):
-    if 'article' in str(row['DT']).lower():
+    if 'article' in str(row.get('DT', '')).lower():
         return True
     return False
 
@@ -34,3 +34,11 @@ def parse_fu_tokens(row):
         tokens = [re.sub(r'[^a-zA-Z0-9]', '', i) for i in re.split(r'[^a-zA-Z0-9]', row['FU'])]
         return ';'.join(uniqify([i for i in tokens if i]))
     return ''
+
+
+def parse_keyword_tokens(row, keyword_field='DE', replace_map=None):
+    replace_map = replace_map or {}
+    if row.get(keyword_field, '') and str(row[keyword_field]) != 'nan':
+        tokens = [i.strip().lower() for i in row[keyword_field].split(';') if i and i.strip()]
+        return list(uniqify([replace_map.get(i, i) for i in tokens]))
+    return []
