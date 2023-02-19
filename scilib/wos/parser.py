@@ -10,7 +10,7 @@ from .parse_doi import parse_cr_dois
 from .parse_tags import parse_tags
 
 from .parse_orcid import parse_orcid_info
-from .parse_address import parse_address_info
+from .parse_address import parse_address_info, parse_rp_address_info
 from .parse_rid import parse_rid_info
 
 ARRAY_KEYS = [
@@ -75,6 +75,7 @@ def parse_version1(items):
         row['cr_dois'] = parse_cr_dois(row)
 
         row['c1_address_info'] = parse_address_info(row.get('C1', ''))
+        row['rp_address_info'] = parse_rp_address_info(row.get('RP', ''))
         row['orcid_info'] = parse_orcid_info(row.get('OI', ''))
         row['rid_info'] = parse_rid_info(row.get('RI', ''))
 

@@ -11,7 +11,7 @@ from scilib.wos.parse_categorys import SSH_CATEGORYS_SET, parse_ecoom_categorys
 from scilib.wos.parse_doi import parse_cr_dois
 from scilib.wos.parse_orcid import parse_orcid, parse_orcid_info
 from scilib.wos.parse_rid import parse_rid
-from scilib.wos.parse_address import parse_address, parse_address_info
+from scilib.wos.parse_address import parse_address, parse_address_info, parse_rp_address, parse_rp_address_info
 from scilib.wos.parser import parse_version1
 
 TEST_PATH = os.path.dirname(__file__)
@@ -61,6 +61,22 @@ class WOSParserTest(TestCase):
             # for key in item.keys():
             #     if len(key) > 2:
             #         print(key, item[key])
+
+    def test_parse_rp_address(self):
+        df = read_text_format_dir_as_pd(TEST_PATH)
+        items = [dict(row) for i, row in df.iterrows()]
+
+        for item in items:
+            parse_rp_address(item['RP'])
+            parse_rp_address_info(item['RP'])
+
+        text = """
+Kurniawan, TA (corresponding author), Xiamen Univ, Coll Ecol & Environm, Xiamen 361102, Peoples R China.;
+        """.strip().replace('\n', '') # noqa
+        results = parse_rp_address(text)
+
+        self.assertEqual(results[0][0], 'Kurniawan, TA')
+        self.assertEqual(results[0][1], 'Xiamen Univ, Coll Ecol & Environm, Xiamen 361102, Peoples R China.')
 
     def test_parse_address(self):
         df = read_text_format_dir_as_pd(TEST_PATH)

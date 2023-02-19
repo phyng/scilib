@@ -28,12 +28,12 @@ def report_cnki_org(cnki_items, *, outpur_dir):
 
     orgs_list = [[i.strip() for i in token.split(';') if i.strip()] for token in [i['Organ'] for i in cnki_items]]
     counter = Counter([i for li in orgs_list for i in li])
-    items = []
+    org_items = []
     for i, (k, v) in enumerate(counter.most_common()):
-        items.append(dict(i=i + 1, name=k, count=v))
+        org_items.append(dict(i=i + 1, name=k, count=v))
 
     org_map = {}
-    for item in items:
+    for item in org_items:
         match_name = None
         match_type = None
         for n in org_table_names:
@@ -59,9 +59,23 @@ def report_cnki_org(cnki_items, *, outpur_dir):
         if match_name:
             org_map[item['name']] = match_name
 
-    items_matched = [i for i in items if i['name'] in org_map]
-    pd.DataFrame.from_records(items).to_csv(os.path.join(outpur_dir, "org.items.csv"), index=False)
-    pd.DataFrame.from_records(items_matched).to_csv(os.path.join(outpur_dir, "org.items_matched.csv"), index=False)
+    org_items_matched = [i for i in org_items if i['name'] in org_map]
+    pd.DataFrame.from_records(org_items).to_csv(os.path.join(outpur_dir, "org.items.csv"), index=False)
+    pd.DataFrame.from_records(org_items_matched).to_csv(
+        os.path.join(outpur_dir, "org.items_matched.csv"), index=False
+    )
+
+    matched_orgs_list = []
+    for orgs in orgs_list:
+        matched_orgs = []
+        for org in orgs:
+            if org in org_map and org_map[org] not in matched_orgs:
+                matched_orgs.append(org_map[org])
+        matched_orgs_list.append(matched_orgs)
+    corrs = get_corrs(matched_orgs_list)
+    corrs_csv_string = corrs_to_csv_string(corrs)
+    with open(os.path.join(outpur_dir, "org.corrs.csv"), "w") as f:
+        f.write(corrs_csv_string)
 
 
 def report_cnki_keywords(

@@ -15,6 +15,28 @@ from scilib.corrs.corrs_utils import (
 from scilib.wos.parse_common import parse_keyword_tokens
 
 
+def report_wos_org(wos_items, *, outpur_dir):
+    orgs_list = []
+    for item in wos_items:
+        orgs = []
+        for info in (item['c1_address_info'] + item['rp_address_info']):
+            if info['org'] not in orgs:
+                orgs.append(info['org'])
+        orgs_list.append(orgs)
+
+    counter = Counter([i for li in orgs_list for i in li])
+    org_items = []
+    for i, (k, v) in enumerate(counter.most_common()):
+        org_items.append(dict(i=i + 1, name=k, count=v))
+
+    pd.DataFrame.from_records(org_items).to_csv(os.path.join(outpur_dir, "org.items.csv"), index=False)
+
+    corrs = get_corrs(orgs_list)
+    corrs_csv_string = corrs_to_csv_string(corrs)
+    with open(os.path.join(outpur_dir, "org.corrs.csv"), "w") as f:
+        f.write(corrs_csv_string)
+
+
 def report_wos_keywords(
     wos_items,
     *,
@@ -43,8 +65,8 @@ def report_wos_keywords(
 
     # cortext network with year
     networks = {}
-    for year in sorted(set([item["PY"] for item in wos_items if item["PY"] and str(item["PY"]) != "nan"])):
-        year_items = [item for item in wos_items if item["PY"] == year]
+    for year in sorted(set([item["PY"] for item in wos_items if item.get("PY") and str(item["PY"]) != "nan"])):
+        year_items = [item for item in wos_items if item.get("PY") == year]
         year_corrs = get_corrs([
             parse_keyword_tokens(item, keyword_field=keyword_field, replace_map=keyword_replace_map)
             for item in year_items
@@ -73,3 +95,4 @@ def report_wos_all(
         keyword_field=keyword_field,
         keyword_replace_map=keyword_replace_map,
     )
+    report_wos_org(wos_items, outpur_dir=outpur_dir)
