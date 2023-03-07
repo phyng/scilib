@@ -201,6 +201,9 @@ def read_spider_format(file_path, *, fields=None, keyword_replace_map=None):
             #     f'list_quote={list_quote} list_download={list_download}'
             # )
 
+            if not pq_row.find('.icon-collect'):
+                continue
+
             icon_collect = pq_row.find('.icon-collect')[0]
             list_dbname = icon_collect.attrib['data-dbname']
             list_filename = icon_collect.attrib['data-filename']

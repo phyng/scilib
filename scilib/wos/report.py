@@ -36,6 +36,11 @@ def report_wos_org(wos_items, *, outpur_dir):
     with open(os.path.join(outpur_dir, "org.corrs.csv"), "w") as f:
         f.write(corrs_csv_string)
 
+    # pnetview txt format
+    pnetview_text = '\n'.join([','.join([t.replace(',', '-') for t in orgs]) for orgs in orgs_list if orgs])
+    with open(os.path.join(outpur_dir, "org.pnetview.txt"), "w") as f:
+        f.write(pnetview_text)
+
 
 def report_wos_keywords(
     wos_items,
