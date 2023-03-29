@@ -15,7 +15,7 @@ def get_corrs(tokens_list, top_size=50):
             count = len([True for tokens in tokens_list if token1 in tokens and token2 in tokens])
             line.append(count)
         corrs.append(line)
-    return corrs
+    return [counter, corrs]
 
 
 def corrs_to_csv_string(corrs, name_map=None):
