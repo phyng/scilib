@@ -22,31 +22,34 @@ scilib-gender-benchmark = "scilib.gender.benchmark.benchmark:run"
 python = ">=3.9,<3.12"
 pandas = "^1.5.3"
 jupyter = "^1.0.0"
-numpy = "^1.24.2"
+numpy = "^1.24.3"
 xlrd = "^2.0.1"
-matplotlib = "^3.7.0"
-scipy = "^1.10.0"
+matplotlib = "^3.7.1"
+scipy = "^1.10.1"
 requests = {extras = ["socks"], version = "^2.28.2"}
-openpyxl = "^3.1.1"
-orjson = "^3.8.6"
-nltk = "^3.8"
+openpyxl = "^3.1.2"
+orjson = "^3.8.10"
+nltk = "^3.8.1"
 pypinyin = "^0.48"
 tabulate = "^0.9.0"
-naiveBayesClassifier = "^0.1.3"
 pyquery = "^2.0.0"
 libs = "^0.0.10"
-jupyterlab = "^3.6.1"
+jupyterlab = "^3.6.3"
 nameparser = "^1.1.2"
 Unidecode = "^1.3.6"
 aiohttp = "^3.8.4"
-redis = "^3.5.3"
-psycopg2 = "^2.9.5"
-SQLAlchemy = "^1.4.45"
 
-gender-guesser = { version = "0.4.0", optional = true }
+# db
+redis = { version = "^3.5.3", optional = true }
+psycopg2 = { version = "^2.9.5", optional = true }
+SQLAlchemy = { version = "^1.4.45", optional = true }
+pandas_access = { version = "^0.0.1", optional = true }
+
+# gender
+gender-guesser = { version = "^0.4.0", optional = true }
 genderizer = { version = "^0.1.2", optional = true }
 agefromname = { version = "^0.0.8", optional = true }
-pandas_access = "^0.0.1"
+naiveBayesClassifier = { version = "^0.1.3", optional = true }
 
 [tool.poetry.dev-dependencies]
 sphinx = "^5.3.0"
@@ -57,7 +60,8 @@ flake8 = "^6.0.0"
 wheel = "^0.38.4"
 
 [tool.poetry.extras]
-gender = ["agefromname", "gender-guesser", "genderizer"]
+db = ["redis", "psycopg2", "SQLAlchemy", "pandas_access"]
+gender = ["agefromname", "gender-guesser", "genderizer", "naiveBayesClassifier"]
 
 [build-system]
 requires = ["poetry>=0.12"]
