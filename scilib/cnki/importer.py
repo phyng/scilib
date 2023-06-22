@@ -161,9 +161,16 @@ def parse_txt_file(file_path):
     return articles.values()
 
 
-def read_text_format_dir(from_dir):
+def read_text_format_dir(from_dir, keyword_replace_map=None):
     for file in Path(from_dir).glob('**/*.txt'):
-        yield from parse_txt_file(file)
+        for item in parse_txt_file(file):
+            item['fu_tokens'] = parse_fu_tokens(item)
+            item['keyword_tokens'] = parse_keyword_tokens(item, keyword_replace_map=keyword_replace_map)
+            item['parsed_year'] = parse_year(item)
+            item['clc_tokens'] = parse_clc_tokens(item)
+            item['clc_level1_tokens'] = parse_clc_level1_tokens(item)
+            item['clc_level2_tokens'] = parse_clc_level2_tokens(item)
+            yield item
 
 
 def read_spider_format(file_path, *, fields=None, keyword_replace_map=None):

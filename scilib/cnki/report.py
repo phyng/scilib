@@ -107,8 +107,9 @@ def report_cnki_keywords(
     cnki_items,
     *,
     outpur_dir,
+    top_size=50,
 ):
-    counter, corrs = get_corrs([item["keyword_tokens"] for item in cnki_items])
+    counter, corrs = get_corrs([item["keyword_tokens"] for item in cnki_items], top_size=top_size)
     corrs_csv_string = corrs_to_csv_string(corrs)
     with open(os.path.join(outpur_dir, "keywords.corrs.csv"), "w") as f:
         f.write(corrs_csv_string)
@@ -147,7 +148,8 @@ def report_cnki_all(
     cnki_items,
     *,
     outpur_dir,
+    keywords_top_size=50,
 ):
     pd.DataFrame.from_records(cnki_items).to_csv(os.path.join(outpur_dir, "items.csv"), index=False)
-    report_cnki_keywords(cnki_items, outpur_dir=outpur_dir)
+    report_cnki_keywords(cnki_items, outpur_dir=outpur_dir, top_size=keywords_top_size)
     report_cnki_org(cnki_items, outpur_dir=outpur_dir)

@@ -48,6 +48,7 @@ def report_wos_keywords(
     outpur_dir,
     keyword_field="DE",
     keyword_replace_map=None,
+    top_size=50
 ):
     keyword_tokens_list = [
         parse_keyword_tokens(item, keyword_field=keyword_field, replace_map=keyword_replace_map)
@@ -58,7 +59,7 @@ def report_wos_keywords(
     pd.DataFrame(counter_items).to_csv(os.path.join(outpur_dir, "keywords.counter.csv"), index=False)
 
     # corrs
-    _, corrs = get_corrs(keyword_tokens_list)
+    _, corrs = get_corrs(keyword_tokens_list, top_size=top_size)
     corrs_csv_string = corrs_to_csv_string(corrs)
     with open(os.path.join(outpur_dir, "keywords.corrs.csv"), "w") as f:
         f.write(corrs_csv_string)
@@ -93,11 +94,14 @@ def report_wos_all(
     outpur_dir,
     keyword_field="DE",
     keyword_replace_map=None,
+    keywords_top_size=50,
 ):
+    pd.DataFrame.from_records(wos_items).to_csv(os.path.join(outpur_dir, "items.csv"), index=False)
     report_wos_keywords(
         wos_items,
         outpur_dir=outpur_dir,
         keyword_field=keyword_field,
         keyword_replace_map=keyword_replace_map,
+        top_size=keywords_top_size
     )
     report_wos_org(wos_items, outpur_dir=outpur_dir)
