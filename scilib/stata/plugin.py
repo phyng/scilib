@@ -85,6 +85,28 @@ def margins(var_list, title=None, xtitle=None, ytitle=None):
     )
 
 
+def teteffects(var_treat, var_deps, var_result):
+    return call_batch(
+        call('* teteffects ipw'),
+        call(f'teffects ipw ({var_result}) ({var_treat} {var_deps})'),
+
+        call('* teteffects aipw'),
+        call(f'teffects aipw ({var_result}) ({var_treat} {var_deps})'),
+    )
+
+
+def did(time, treated, y, cov=''):
+    return call_batch(
+        call('* DID 分析'),
+        call(f'reg {y} {time}##{treated} {cov}, r'),
+        call(f'diff {y}, t({treated}) p({time}) {f"cov({cov})" if cov else ""}'),
+        call(f'diff {y}, t({treated}) p({time}) {f"cov({cov})" if cov else ""} test'),
+        call(f'collapse (mean) {y}, by({time} {treated})'),
+        call(f'twoway (line {y} {time} if {treated}==1) (line {y} {time} if {treated}==0), legend(label(1 Treated) label(2 Control))'),  # noqa
+        call('graph export did.pdf, replace'),
+    )
+
+
 def psm(var_treat, var_deps, var_result, word_file='mytable.docx'):
 
     def graph(suffix):

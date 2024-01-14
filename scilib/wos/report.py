@@ -2,10 +2,12 @@
 
 from __future__ import unicode_literals, absolute_import, print_function, division
 from collections import Counter
+import json
 import os
 import pandas as pd
 
 from scilib.corrs.corrs_utils import (
+    corrs_to_pnetview_json,
     get_corrs,
     corrs_to_csv_string,
     corrs_to_cortext_network,
@@ -48,6 +50,7 @@ def report_wos_keywords(
     outpur_dir,
     keyword_field="DE",
     keyword_replace_map=None,
+    top_size=50
 ):
     keyword_tokens_list = [
         parse_keyword_tokens(item, keyword_field=keyword_field, replace_map=keyword_replace_map)
@@ -58,7 +61,7 @@ def report_wos_keywords(
     pd.DataFrame(counter_items).to_csv(os.path.join(outpur_dir, "keywords.counter.csv"), index=False)
 
     # corrs
-    _, corrs = get_corrs(keyword_tokens_list)
+    _, corrs = get_corrs(keyword_tokens_list, top_size=top_size)
     corrs_csv_string = corrs_to_csv_string(corrs)
     with open(os.path.join(outpur_dir, "keywords.corrs.csv"), "w") as f:
         f.write(corrs_csv_string)
@@ -87,17 +90,61 @@ def report_wos_keywords(
         f.write(pnetview_text)
 
 
+def report_country(wos_items, *, outpur_dir, country_map):
+    prefix = 'country.with_country_map' if country_map else 'country'
+    for field in ['countrys_c1_rp', 'countrys_rp', 'first_country']:
+        countrys_list = []
+        year_countrys_list = {}
+        total_count = 0
+        for item in wos_items:
+            if field == 'first_country':
+                countrys = [item['first_country']] if item['first_country'] else []
+            else:
+                countrys = list(set(item[field]))
+
+            # map and filter by country_map
+            if country_map:
+                countrys = [country_map.get(i, i) for i in countrys]
+            countrys = [i for i in countrys if i]
+            if not countrys:
+                continue
+
+            total_count += 1
+            countrys_list.append(countrys)
+            if item.get('PY'):
+                year_countrys_list.setdefault(item['PY'], []).append(countrys)
+
+        with open(os.path.join(outpur_dir, f'{prefix}.{field}.count.csv'), 'w') as f:
+            f.write(str(total_count))
+
+        for size in [50, 100]:
+            _, corrs = get_corrs(countrys_list, top_size=size)
+            csv = corrs_to_csv_string(corrs)
+            with open(os.path.join(outpur_dir, f'{prefix}.{field}.corr.{size}.csv'), 'w') as f:
+                f.write(csv)
+            pnetview_json = corrs_to_pnetview_json(corrs)
+            with open(os.path.join(outpur_dir, f'{prefix}.{field}.pnetview.{size}.json'), 'w') as f:
+                json.dump(pnetview_json, f)
+
+
 def report_wos_all(
     wos_items,
     *,
     outpur_dir,
     keyword_field="DE",
     keyword_replace_map=None,
+    keywords_top_size=50,
+    country_map=None
 ):
+    pd.DataFrame.from_records(wos_items).to_csv(os.path.join(outpur_dir, "items.csv"), index=False)
     report_wos_keywords(
         wos_items,
         outpur_dir=outpur_dir,
         keyword_field=keyword_field,
         keyword_replace_map=keyword_replace_map,
+        top_size=keywords_top_size
     )
     report_wos_org(wos_items, outpur_dir=outpur_dir)
+    report_country(wos_items, outpur_dir=outpur_dir, country_map=None)
+    if country_map:
+        report_country(wos_items, outpur_dir=outpur_dir, country_map=country_map)

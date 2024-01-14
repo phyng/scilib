@@ -3,6 +3,7 @@
 from __future__ import unicode_literals, absolute_import, print_function, division
 
 import json
+from typing import List
 import pandas as pd
 from optparse import OptionParser
 from collections import Counter
@@ -35,7 +36,7 @@ def make_matrix_csv(nodes, edges):
     return '\n'.join(lines)
 
 
-def make_sankey_data(nodes, edges):
+def make_sankey_data(nodes: List[str], edges):
     data_nodes = [dict(name=node) for node in nodes]
     counter = Counter(edges)
     data_links = []

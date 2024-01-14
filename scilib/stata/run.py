@@ -25,7 +25,7 @@ logging.basicConfig(
     filemode='a',
 )
 
-STATA_ENTRY = os.environ.get('STATA_ENTRY', '/Applications/Stata/StataSE.app/Contents/MacOS/StataSE')
+STATA_ENTRY = os.environ.get('STATA_ENTRY', '/Applications/Stata/StataMP.app/Contents/MacOS/StataMP')
 logger = logging.getLogger('stata')
 logger.addHandler(logging.StreamHandler())
 
