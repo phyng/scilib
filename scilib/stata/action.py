@@ -3,7 +3,7 @@
 from __future__ import unicode_literals, absolute_import, print_function, division
 
 from itertools import combinations
-from .plugin import summary, reg, nbreg, psm, margins, label
+from .plugin import summary, reg, nbreg, psm, margins, label, teteffects, did
 
 
 def use_actions(actions, config_actions):
@@ -21,6 +21,19 @@ def use_actions(actions, config_actions):
             actions.append(margins(action["vars"], title=action.get('title'), xtitle=action.get('xtitle'), ytitle=action.get('ytitle')))  # noqa
         elif action['type'] == 'psm':
             actions.append(psm(action["treatVar"], action["vars"], action["depVar"]))
+        elif action['type'] == 'teteffects':
+            actions.append(teteffects(action["treatVar"], action["vars"], action["depVar"]))
+        elif action['type'] == 'did':
+            """
+            {
+                "type": "did",
+                "time": "time",
+                "treated": "treated",
+                "y": "y",
+                "cov": "x1 x2 x3"
+            }
+            """
+            actions.append(did(action["time"], action["treated"], action["y"], action["cov"]))
         elif action['type'] == 'combinations':
             for var_list in combinations(action['vars'].split(), action['count']):
                 for _action in action['actions']:

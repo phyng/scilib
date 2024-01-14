@@ -73,9 +73,12 @@ def read_text_format_path(path, *, export_type='other_text'):
 
 def scan_text_format_dir(abs_path, *, globs=None):
     globs = globs or ['**/*.txt', '**/*.csv', '*.csv', '*.txt']
+    paths = set()
     for glob in globs:
         for path in Path(abs_path).glob(glob):
-            yield path
+            if str(path) not in paths:
+                paths.add(str(path))
+                yield path
 
 
 def read_text_format_dir(abs_path, *, globs=None, export_type='other_text'):

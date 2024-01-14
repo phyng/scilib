@@ -110,6 +110,8 @@ def report_cnki_keywords(
     top_size=50,
 ):
     counter, corrs = get_corrs([item["keyword_tokens"] for item in cnki_items], top_size=top_size)
+    top_n = [token for token, _ in counter.most_common(top_size)]
+
     corrs_csv_string = corrs_to_csv_string(corrs)
     with open(os.path.join(outpur_dir, "keywords.corrs.csv"), "w") as f:
         f.write(corrs_csv_string)
@@ -126,15 +128,26 @@ def report_cnki_keywords(
     with open(os.path.join(outpur_dir, "keywords.cortext.csv"), "w") as f:
         f.write(cortext_network_to_csv_string(cortext_network))
 
+    # keywords_year_extend
+    top_keywords_year_extend = []
+
     # cortext network with year
     networks = {}
     for year in sorted(set([item["parsed_year"] for item in cnki_items if item["parsed_year"]])):
         year_items = [item for item in cnki_items if item["parsed_year"] == year]
-        _, year_corrs = get_corrs([item["keyword_tokens"] for item in year_items])
+        year_counter, year_corrs = get_corrs([item["keyword_tokens"] for item in year_items])
         networks[int(year)] = corrs_to_cortext_network(year_corrs)
+        for k, v in year_counter.most_common():
+            if k in top_n:
+                top_keywords_year_extend.extend(dict(year=year, keyword=k) for i in range(v))
+
     year_cortext_networks = merge_year_cortext_networks(networks)
     with open(os.path.join(outpur_dir, "keywords.cortext_with_year.csv"), "w") as f:
         f.write(cortext_network_to_csv_string(year_cortext_networks))
+
+    pd.DataFrame.from_records(top_keywords_year_extend).to_csv(
+        os.path.join(outpur_dir, "keywords.top.year_extend.csv"), index=False
+    )
 
     # pnetview txt format
     pnetview_text = '\n'.join(
@@ -151,5 +164,9 @@ def report_cnki_all(
     keywords_top_size=50,
 ):
     pd.DataFrame.from_records(cnki_items).to_csv(os.path.join(outpur_dir, "items.csv"), index=False)
-    report_cnki_keywords(cnki_items, outpur_dir=outpur_dir, top_size=keywords_top_size)
+    report_cnki_keywords(
+        cnki_items,
+        outpur_dir=outpur_dir,
+        top_size=keywords_top_size
+    )
     report_cnki_org(cnki_items, outpur_dir=outpur_dir)
