@@ -23,6 +23,14 @@ def use_actions(actions, config_actions):
             actions.append(psm(action["treatVar"], action["vars"], action["depVar"]))
         elif action['type'] == 'teteffects':
             actions.append(teteffects(action["treatVar"], action["vars"], action["depVar"]))
+        elif action['type'] == 'exec':
+            """
+            {
+                "type": "exec",
+                "command": "command"
+            }
+            """
+            actions.append(action['command'])
         elif action['type'] == 'did':
             """
             {
