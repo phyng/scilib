@@ -44,6 +44,30 @@ def report_wos_org(wos_items, *, outpur_dir):
         f.write(pnetview_text)
 
 
+def report_wos_wc(wos_items, *, outpur_dir):
+    wcs_list = []
+    for item in wos_items:
+        wcs = [i.strip() for i in item.get('WC', '').split(';') if i.strip()]
+        wcs_list.append(wcs)
+
+    counter = Counter([i for li in wcs_list for i in li])
+    wcs_items = []
+    for i, (k, v) in enumerate(counter.most_common()):
+        wcs_items.append(dict(i=i + 1, name=k, count=v))
+
+    pd.DataFrame.from_records(wcs_items).to_csv(os.path.join(outpur_dir, "wcs.items.csv"), index=False)
+
+    _, corrs = get_corrs(wcs_list)
+    corrs_csv_string = corrs_to_csv_string(corrs)
+    with open(os.path.join(outpur_dir, "wc.corrs.csv"), "w") as f:
+        f.write(corrs_csv_string)
+
+    # pnetview txt format
+    pnetview_text = '\n'.join([','.join([t.replace(',', '-') for t in wcs]) for wcs in wcs_list if wcs])
+    with open(os.path.join(outpur_dir, "wc.pnetview.txt"), "w") as f:
+        f.write(pnetview_text)
+
+
 def report_wos_keywords(
     wos_items,
     *,
@@ -59,6 +83,7 @@ def report_wos_keywords(
     counter = Counter([token for tokens in keyword_tokens_list for token in tokens])
     counter_items = [dict(keyword=k, count=v) for k, v in counter.most_common()]
     pd.DataFrame(counter_items).to_csv(os.path.join(outpur_dir, "keywords.counter.csv"), index=False)
+    top_n = [token for token, _ in counter.most_common(top_size)]
 
     # corrs
     _, corrs = get_corrs(keyword_tokens_list, top_size=top_size)
@@ -71,18 +96,29 @@ def report_wos_keywords(
     with open(os.path.join(outpur_dir, "keywords.cortext.csv"), "w") as f:
         f.write(cortext_network_to_csv_string(cortext_network))
 
+    # keywords_year_extend
+    top_keywords_year_extend = []
+
     # cortext network with year
     networks = {}
     for year in sorted(set([item["PY"] for item in wos_items if item.get("PY") and str(item["PY"]) != "nan"])):
         year_items = [item for item in wos_items if item.get("PY") == year]
-        _, year_corrs = get_corrs([
+        year_counter, year_corrs = get_corrs([
             parse_keyword_tokens(item, keyword_field=keyword_field, replace_map=keyword_replace_map)
             for item in year_items
         ])
         networks[int(year)] = corrs_to_cortext_network(year_corrs)
+        for k, v in year_counter.most_common():
+            if k in top_n:
+                top_keywords_year_extend.extend(dict(year=year, keyword=k) for i in range(v))
+
     year_cortext_networks = merge_year_cortext_networks(networks)
     with open(os.path.join(outpur_dir, "keywords.cortext_with_year.csv"), "w") as f:
         f.write(cortext_network_to_csv_string(year_cortext_networks))
+
+    pd.DataFrame.from_records(top_keywords_year_extend).to_csv(
+        os.path.join(outpur_dir, "keywords.top.year_extend.csv"), index=False
+    )
 
     # pnetview txt format
     pnetview_text = '\n'.join([','.join([t.replace(',', '-') for t in tokens]) for tokens in keyword_tokens_list])
@@ -145,6 +181,7 @@ def report_wos_all(
         top_size=keywords_top_size
     )
     report_wos_org(wos_items, outpur_dir=outpur_dir)
+    report_wos_wc(wos_items, outpur_dir=outpur_dir)
     report_country(wos_items, outpur_dir=outpur_dir, country_map=None)
     if country_map:
         report_country(wos_items, outpur_dir=outpur_dir, country_map=country_map)
