@@ -41,7 +41,7 @@ def corrs_to_csv_string(corrs, name_map=None):
     name_map = name_map or (lambda x: x)
     lines = []
     for row in corrs:
-        lines.append(','.join([name_map(row[0])] + [str(i) for i in row[1:]]))
+        lines.append(','.join(['"' + name_map(row[0]) + '"'] + [str(i) for i in row[1:]]))
     return '\n'.join(lines)
 
 
