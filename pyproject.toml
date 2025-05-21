@@ -20,7 +20,7 @@ scilib-gender-benchmark = "scilib.gender.benchmark.benchmark:run"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"
-pandas = "^1.5.3"
+pandas = ">1.5.3"
 numpy = "^1.24.3"
 xlrd = "^2.0.1"
 matplotlib = "^3.7.1"

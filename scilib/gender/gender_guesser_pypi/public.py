@@ -4,10 +4,14 @@ import gender_guesser.detector as gender
 
 
 def batch_classify(names):
-    first_names = [i.split()[0] for i in names]
+    first_names = [i.split()[0] if i and i.split() else '' for i in names]
     results = []
+
     d = gender.Detector(case_sensitive=False)
     for first_name in first_names:
+        if not first_name:
+            results.append('error')
+            continue
         result = d.get_gender(first_name)
         if result in ['male', 'mostly_male']:
             results.append('male')

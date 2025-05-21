@@ -9,7 +9,7 @@ CLI_PATH = os.path.join(BASE_DIR, 'cli.go')
 
 
 def batch_classify(names):
-    first_names = [i.split()[0].replace(',', '') for i in names]
+    first_names = [i.split()[0].replace(',', '') if i else '' for i in names]
 
     output_results = {}
     for chunk in chunks(first_names, size=500):
@@ -23,6 +23,9 @@ def batch_classify(names):
 
     results = []
     for first_name in first_names:
+        if not first_name:
+            results.append('error')
+            continue
         result = output_results.get(first_name, "unknown")
         if result in ['Male']:
             results.append('male')

@@ -9,7 +9,7 @@ from typing import Dict, List, Optional
 
 def call_gpt(
     messages: List[Dict[str, str]],
-    model: str = "deepseek-chat",
+    model: Optional[str] = None,
     temperature: float = 0.7,
     api_key: Optional[str] = None,
     api_url: Optional[str] = None
@@ -25,6 +25,7 @@ def call_gpt(
     # 获取配置，优先使用传入参数，其次使用环境变量
     api_key = api_key or os.getenv('OPENAI_API_KEY', '')
     api_url = api_url or os.getenv('OPENAI_API_URL', 'https://api.deepseek.com/chat/completions')
+    model = model or os.getenv('OPENAI_MODEL', 'deepseek-chat')
 
     headers = {
         "Content-Type": "application/json",

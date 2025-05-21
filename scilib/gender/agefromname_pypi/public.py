@@ -4,7 +4,7 @@ from agefromname import AgeFromName
 
 
 def batch_classify(names):
-    first_names = [i.split()[0].lower() for i in names]
+    first_names = [i.split()[0].lower() if i else '' for i in names]
 
     age_from_name = AgeFromName()
     df_all_result = age_from_name.get_all_name_male_prob()

@@ -3,130 +3,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import asyncio
-import datetime
 import json
 import os
 import re
-from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-import pandas as pd
-
-from libs.iterlib import uniqify
 from pyquery import PyQuery
+from concurrent.futures import ProcessPoolExecutor
 
-CLC_MAP_PATH = Path(__file__).parent / 'config/clc_map.csv'
-CLC_MAP_DATA = {}
-
-FIELDS = [
-    'SrcDatabase',
-    'Title',
-    'Author',
-    'Organ',
-    'Source',
-    'Keyword',
-    'Summary',
-    'PubTime',
-    'FirstDuty',
-    'Fund',
-    'Year',
-    'Volume',
-    'Period',
-    'PageCount',
-    'CLC',
-]
-
-
-def get_clc_map():
-    global CLC_MAP_DATA
-    if not CLC_MAP_DATA:
-        for _, row in pd.read_csv(CLC_MAP_PATH, encoding='utf-8').iterrows():
-            if row['key'] and str(row['key']) != 'nan' and row['value'] and str(row['value']) != 'nan':
-                CLC_MAP_DATA[row['key'].strip()] = row['value'].strip()
-    return CLC_MAP_DATA
-
-
-def parse_fu_tokens(row):
-    if row.get('Fund', '') and str(row['Fund']) != 'nan':
-        tokens = [re.sub(r'[^a-zA-Z0-9]', '', i) for i in re.split(r'[^a-zA-Z0-9]', row['Fund'])]
-        return list(uniqify([i for i in tokens if i]))
-    return []
-
-
-def parse_clc_tokens(row):
-    if row.get('CLC', '') and str(row['CLC']) != 'nan':
-        clc = row['CLC']
-        try:
-            clc = clc[:clc.index('ISSN')]
-        except ValueError:
-            pass
-        return [i.strip() for i in clc.split(';') if i.strip()]
-    return []
-
-
-def parse_clc_level1_tokens(item):
-    clc_map = get_clc_map()
-    tokens = []
-    for token in item['clc_tokens']:
-        if not token:
-            continue
-        elif token in ['+']:
-            continue
-        elif token[:1] in clc_map:
-            tokens.append(token[:1])
-        else:
-            pass
-    return list(uniqify(tokens))
-
-
-def parse_clc_level2_tokens(item):
-    clc_map = get_clc_map()
-    tokens = []
-    for token in item['clc_tokens']:
-        if not token:
-            continue
-        elif token in ['+']:
-            continue
-        elif token[:2] in clc_map:
-            tokens.append(token[:2])
-        elif token[:3] in clc_map:
-            tokens.append(token[:3])
-        else:
-            pass  # tokens.append(token)
-    return list(uniqify(tokens))
-
-
-def parse_keyword_tokens(item, keyword_field='Keyword', keyword_replace_map=None):
-    keyword = item.get(keyword_field, '') or ''
-    if str(keyword) == 'nan':
-        return []
-    tokens = re.split(r'[,;，]', keyword)
-    tokens = [(keyword_replace_map or {}).get(i.strip(), i.strip()) for i in tokens if i and i.strip()]
-    tokens = list(uniqify(tokens))
-    return tokens
-
-
-def parse_year(item, year_field='Year'):
-    year = item.get(year_field, '') or ''
-    if not year or str(year) == 'nan':
-        return None
-    try:
-        if len(str(int(year))) == 4:
-            return int(year)
-    except (ValueError, TypeError):
-        pass
-    return None
-
-
-def parse_list_date(list_date):
-    try:
-        list_date = list_date.split()[0]
-        tokens = list_date.split('-')
-        y = int(tokens[0])
-        m = int(tokens[1])
-        d = int(tokens[2])
-        return datetime.date(y, m, d).strftime(r'%Y-%m-%d')
-    except Exception:
-        return None
+from .parser import CNKI_FIELDS, get_clc_map, parse_cnki_item, parse_list_date
 
 
 def parse_txt_file(file_path):
@@ -149,7 +33,7 @@ def parse_txt_file(file_path):
                 article[currentField] = article.get(currentField, '') + content
             else:
                 article[currentField] = article.get(currentField, '') + content
-        elif [i for i in FIELDS if line.startswith(i + '-') and not line.startswith('Fund-ing')]:
+        elif [i for i in CNKI_FIELDS if line.startswith(i + '-') and not line.startswith('Fund-ing')]:
             currentField = line.split('-')[0]
             content = line[(line.index(':') + 1):].strip()
             article = articles.setdefault(currentIndex, {})
@@ -162,14 +46,10 @@ def parse_txt_file(file_path):
 
 
 def read_text_format_dir(from_dir, keyword_replace_map=None):
+    clc_map = get_clc_map()
     for file in Path(from_dir).glob('**/*.txt'):
         for item in parse_txt_file(file):
-            item['fu_tokens'] = parse_fu_tokens(item)
-            item['keyword_tokens'] = parse_keyword_tokens(item, keyword_replace_map=keyword_replace_map)
-            item['parsed_year'] = parse_year(item)
-            item['clc_tokens'] = parse_clc_tokens(item)
-            item['clc_level1_tokens'] = parse_clc_level1_tokens(item)
-            item['clc_level2_tokens'] = parse_clc_level2_tokens(item)
+            parse_cnki_item(item, clc_map, keyword_replace_map)
             yield item
 
 
@@ -215,7 +95,6 @@ def read_spider_format(file_path, *, fields=None, keyword_replace_map=None):
             list_dbname = icon_collect.attrib['data-dbname']
             list_filename = icon_collect.attrib['data-filename']
             list_id = f'dbname={list_dbname}&filename={list_filename}'
-
             list_date_format = parse_list_date(list_date)
             # if not list_date_format:
             #     print('list_date_format error:', list_date, list_date_format)
@@ -249,7 +128,7 @@ def read_spider_format(file_path, *, fields=None, keyword_replace_map=None):
             continue
 
         # 中文名称完全匹配且机构完全匹配
-        _clean = lambda x: re.sub(r'[^\u4e00-\u9fa5]', '', x)
+        _clean = lambda x: re.sub(r'[^\u4e00-\u9fa5]', '', x)  # noqa: E731
         _clean_list_name = _clean(list_item['list_name'])
         if len(_clean_list_name) > 5:
             _match_items = [
@@ -263,7 +142,7 @@ def read_spider_format(file_path, *, fields=None, keyword_replace_map=None):
                 continue
 
         # 英文名称完全匹配且机构完全匹配
-        _clean = lambda x: re.sub(r'[^a-zA-Z]', '', x).lower()
+        _clean = lambda x: re.sub(r'[^a-zA-Z]', '', x).lower()  # noqa: E731
         _clean_list_name = _clean(list_item['list_name'])
         if len(_clean_list_name) > 10:
             _match_items = [
@@ -279,7 +158,7 @@ def read_spider_format(file_path, *, fields=None, keyword_replace_map=None):
         # 使用期刊和发表日期
         if list_item['list_source'] and list_item['list_date_format']:
             list_token = str(list_item['list_source']) + ':' + str(list_item['list_date_format'])
-            get_item_token = lambda x: str(x.get('Source')) + ':' + str(x.get('PubTime'))[:10]
+            get_item_token = lambda x: str(x.get('Source')) + ':' + str(x.get('PubTime'))[:10]  # noqa: E731
             _match_items = [
                 i for i in raw_txt_items
                 if get_item_token(i) == list_token
@@ -298,13 +177,9 @@ def read_spider_format(file_path, *, fields=None, keyword_replace_map=None):
     for item, list_item in zip(items, list_items):
         item.update(list_item)
 
+    clc_map = get_clc_map()
     for item in items:
-        item['fu_tokens'] = parse_fu_tokens(item)
-        item['keyword_tokens'] = parse_keyword_tokens(item, keyword_replace_map=keyword_replace_map)
-        item['parsed_year'] = parse_year(item)
-        item['clc_tokens'] = parse_clc_tokens(item)
-        item['clc_level1_tokens'] = parse_clc_level1_tokens(item)
-        item['clc_level2_tokens'] = parse_clc_level2_tokens(item)
+        parse_cnki_item(item, clc_map, keyword_replace_map)
 
     if fields:
         for item in items:

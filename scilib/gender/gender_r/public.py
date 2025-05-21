@@ -9,7 +9,7 @@ R_PATH = os.path.join(BASE_DIR, 'gender.R')
 
 
 def batch_classify(names):
-    first_names = [i.split()[0] for i in names]
+    first_names = [i.split()[0] if i and i.split() else '' for i in names]
 
     output_results = {}
     for chunk in chunks(first_names, size=500):
