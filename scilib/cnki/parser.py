@@ -26,6 +26,12 @@ CNKI_FIELDS = [
     'Period',
     'PageCount',
     'CLC',
+    'ISSN',
+    'CN',
+    'CF',
+    'DFR',
+    'RFN',
+    'DOI',
 ]
 
 

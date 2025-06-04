@@ -4,7 +4,7 @@ from __future__ import unicode_literals, absolute_import, print_function, divisi
 
 from collections import Counter
 from functools import partial
-from .importer import parse_keyword_tokens, parse_year
+from .parser import parse_keyword_tokens, parse_year
 
 
 def collect_keywords(
